@@ -16,9 +16,12 @@ program
   .version('0.3.0')
   .argument('<config>', 'Path to configuration file')
   .option('-u, --undo', 'Undo previous patches')
-  .action((configPath, options) => {
+  .action(async (configPath, options) => {
     try {
-      const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+      // Support both .json and .js config files
+      const config = configPath.endsWith('.js') 
+        ? (await import(path.resolve(configPath))).default
+        : JSON.parse(fs.readFileSync(configPath, 'utf8'));
       
       if (options.undo) {
         patcher.undoPatch(config);

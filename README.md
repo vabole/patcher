@@ -19,7 +19,7 @@ npm install
 
 ## Usage
 
-Create a configuration file (e.g., `patch-config.json`):
+Create a configuration file (e.g., `patch-config.json` or `patch-config.js`):
 
 ```json
 {
@@ -80,6 +80,38 @@ patcher --undo patch-config.json
 | `targetFile` | string | (Optional) Specific file to patch, overriding normal entry point resolution |
 | `beautify` | boolean | (Optional) Whether to beautify the code before patching (default: true) |
 | `replacements` | array | Array of [original, replacement] string pairs |
+
+## Configuration Formats
+
+You can use either JSON or JavaScript module format for your configuration.
+
+### JSON Format
+
+```json
+{
+  "globalNpmPackage": "is-odd",
+  "replacements": [
+    ["original string", "replacement string"]
+  ]
+}
+```
+
+### JavaScript Module Format
+
+```js
+// patch-config.js
+export default {
+  globalNpmPackage: "is-odd",
+  replacements: [
+    [
+      "original string", 
+      `replacement string
+      with multiple lines
+      without escaping`
+    ]
+  ]
+}
+```
 
 ## Examples
 
