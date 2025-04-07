@@ -2,7 +2,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
-import { js as beautify } from 'js-beautify';
+import jsBeautify from 'js-beautify';
+
+const beautify = jsBeautify.js;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
