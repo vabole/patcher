@@ -1,6 +1,6 @@
 {
   "name": "@vabole/patcher",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Tool for patching npm packages without modifying source repositories",
   "main": "src/index.js",
   "bin": {
