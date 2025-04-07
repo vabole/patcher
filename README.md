@@ -77,10 +77,13 @@ patcher --undo patch-config.json
 | `packagePath` | string | Path to the file you want to patch |
 | `globalNpmPackage` | string | Name of the global npm package to patch (alternative to packagePath) |
 | `relativePath` | string | (Optional) Relative path within the package (default: 'index.js') |
+| `targetFile` | string | (Optional) Specific file to patch, overriding normal entry point resolution |
 | `beautify` | boolean | (Optional) Whether to beautify the code before patching (default: true) |
 | `replacements` | array | Array of [original, replacement] string pairs |
 
-## Example
+## Examples
+
+### Basic Example
 
 Patching the `is-odd` package to throw an error when zero is provided:
 
@@ -89,6 +92,20 @@ Patching the `is-odd` package to throw an error when zero is provided:
   "globalNpmPackage": "is-odd",
   "replacements": [
     ["module.exports = function isOdd(value) {", "module.exports = function isOdd(value) {\n  if (value === 0) throw new Error('zero is not allowed');"]
+  ]
+}
+```
+
+### Patching a Specific File
+
+When the package's entry point is not the file you want to patch, or when you want to patch a different file:
+
+```json
+{
+  "globalNpmPackage": "@anthropic-ai/claude-code",
+  "targetFile": "lib/main.js",
+  "replacements": [
+    ["function processInput(", "function processInput(\n  // Add custom validation\n"]
   ]
 }
 ```

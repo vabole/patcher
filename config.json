@@ -1,6 +1,7 @@
 {
-  "globalNpmPackage": "is-odd",
+  "globalNpmPackage": "@anthropic-ai/claude-code",
   "beautify": true,
+  "targetFile": "lib/main.js",
   "replacements": [
     ["module.exports = function isOdd(value) {", "module.exports = function isOdd(value) {\n  // Custom patch to validate zero input\n  if (value === 0) throw new Error('zero is not allowed');"]
   ]
