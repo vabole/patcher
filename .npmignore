@@ -1,0 +1,21 @@
+# Development files
+.github/
+.git/
+.gitignore
+.npmrc
+.env
+
+# Test files
+test.js
+local-test-runner.js
+local-config.json
+
+# Editor config
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS specific
+.DS_Store
+Thumbs.db

@@ -1,7 +1,7 @@
 {
-  "name": "patcher",
+  "name": "@vabole/patcher",
   "version": "0.1.0",
-  "description": "Tool for patching npm packages",
+  "description": "Tool for patching npm packages without modifying source repositories",
   "main": "src/index.js",
   "bin": {
     "patcher": "./src/cli.js"
@@ -10,19 +10,35 @@
     "patcher": "node src/cli.js",
     "test": "node local-test-runner.js",
     "test:patch": "node src/cli.js local-config.json",
-    "test:undo": "node src/cli.js --undo local-config.json"
+    "test:undo": "node src/cli.js --undo local-config.json",
+    "prepublishOnly": "npm test"
   },
   "keywords": [
     "patch",
     "npm",
-    "monkey-patch"
+    "monkey-patch",
+    "hotfix",
+    "npm-patch"
   ],
-  "author": "",
+  "author": "vabole",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vabole/patcher.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vabole/patcher/issues"
+  },
+  "homepage": "https://github.com/vabole/patcher#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "dependencies": {
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
-    "is-odd": "^3.0.1",
     "js-beautify": "^1.14.9"
+  },
+  "devDependencies": {
+    "is-odd": "^3.0.1"
   }
 }
