@@ -1,16 +1,40 @@
 const fs = require('fs');
 const path = require('path');
 const beautify = require('js-beautify').js;
+const { execSync } = require('child_process');
+
+/**
+ * Get the file path for a global npm package
+ * @param {string} packageName Name of the global npm package
+ * @param {string} [relativePath='index.js'] Relative path within the package
+ * @returns {string} Absolute path to the package file
+ */
+function getGlobalPackagePath(packageName, relativePath = 'index.js') {
+  try {
+    const npmRootPath = execSync('npm root -g').toString().trim();
+    return path.join(npmRootPath, packageName, relativePath);
+  } catch (error) {
+    throw new Error(`Failed to locate global package ${packageName}: ${error.message}`);
+  }
+}
 
 /**
  * Apply patches to a file
  * @param {Object} config Configuration object
- * @param {string} config.packagePath Path to the package to patch
+ * @param {string} [config.packagePath] Path to the package to patch
+ * @param {string} [config.globalNpmPackage] Name of the global npm package to patch
+ * @param {string} [config.relativePath] Relative path within the package (default: 'index.js')
  * @param {Array<Array<string>>} config.replacements Array of [original, replacement] pairs
  */
 function applyPatch(config) {
-  if (!config.packagePath) {
-    throw new Error('packagePath is required in config');
+  let filePath;
+  
+  if (config.globalNpmPackage) {
+    filePath = getGlobalPackagePath(config.globalNpmPackage, config.relativePath);
+  } else if (config.packagePath) {
+    filePath = path.resolve(config.packagePath);
+  } else {
+    throw new Error('Either packagePath or globalNpmPackage is required in config');
   }
   
   if (!Array.isArray(config.replacements)) {
@@ -18,7 +42,6 @@ function applyPatch(config) {
   }
   
   // Read the file
-  const filePath = path.resolve(config.packagePath);
   let fileContent = fs.readFileSync(filePath, 'utf8');
   
   // Create backup file if it doesn't exist
@@ -76,14 +99,21 @@ function applyPatch(config) {
 /**
  * Undo patches by restoring from backup
  * @param {Object} config Configuration object
- * @param {string} config.packagePath Path to the package to patch
+ * @param {string} [config.packagePath] Path to the package to patch
+ * @param {string} [config.globalNpmPackage] Name of the global npm package to patch
+ * @param {string} [config.relativePath] Relative path within the package (default: 'index.js')
  */
 function undoPatch(config) {
-  if (!config.packagePath) {
-    throw new Error('packagePath is required in config');
+  let filePath;
+  
+  if (config.globalNpmPackage) {
+    filePath = getGlobalPackagePath(config.globalNpmPackage, config.relativePath);
+  } else if (config.packagePath) {
+    filePath = path.resolve(config.packagePath);
+  } else {
+    throw new Error('Either packagePath or globalNpmPackage is required in config');
   }
   
-  const filePath = path.resolve(config.packagePath);
   const backupPath = `${filePath}.backup`;
   
   if (!fs.existsSync(backupPath)) {
