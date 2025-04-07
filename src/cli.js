@@ -1,15 +1,19 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
-const { program } = require('commander');
-const chalk = require('chalk');
-const patcher = require('./index');
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { Command } from 'commander';
+import chalk from 'chalk';
+import * as patcher from './index.js';
+
+const program = new Command();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 program
   .name('patcher')
   .description('Patch installed npm packages')
-  .version('0.1.0')
+  .version('0.1.1')
   .argument('<config>', 'Path to configuration file')
   .option('-u, --undo', 'Undo previous patches')
   .action((configPath, options) => {

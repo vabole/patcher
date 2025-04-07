@@ -5,6 +5,7 @@
     "access": "public"
   },
   "description": "Tool for patching npm packages without modifying source repositories",
+  "type": "module",
   "main": "src/index.js",
   "bin": {
     "patcher": "src/cli.js"
@@ -34,7 +35,7 @@
   },
   "homepage": "https://github.com/vabole/patcher#readme",
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=22.0.0"
   },
   "dependencies": {
     "chalk": "^4.1.2",

@@ -1,7 +1,10 @@
-const fs = require('fs');
-const path = require('path');
-const beautify = require('js-beautify').js;
-const { execSync } = require('child_process');
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { execSync } from 'node:child_process';
+import { js as beautify } from 'js-beautify';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
  * Get the file path for a global npm package
@@ -9,7 +12,7 @@ const { execSync } = require('child_process');
  * @param {string} [relativePath='index.js'] Relative path within the package
  * @returns {string} Absolute path to the package file
  */
-function getGlobalPackagePath(packageName, relativePath = 'index.js') {
+export function getGlobalPackagePath(packageName, relativePath = 'index.js') {
   try {
     const npmRootPath = execSync('npm root -g').toString().trim();
     return path.join(npmRootPath, packageName, relativePath);
@@ -26,7 +29,7 @@ function getGlobalPackagePath(packageName, relativePath = 'index.js') {
  * @param {string} [config.relativePath] Relative path within the package (default: 'index.js')
  * @param {Array<Array<string>>} config.replacements Array of [original, replacement] pairs
  */
-function applyPatch(config) {
+export function applyPatch(config) {
   let filePath;
   
   if (config.globalNpmPackage) {
@@ -103,7 +106,7 @@ function applyPatch(config) {
  * @param {string} [config.globalNpmPackage] Name of the global npm package to patch
  * @param {string} [config.relativePath] Relative path within the package (default: 'index.js')
  */
-function undoPatch(config) {
+export function undoPatch(config) {
   let filePath;
   
   if (config.globalNpmPackage) {
@@ -125,8 +128,3 @@ function undoPatch(config) {
   
   return { success: true };
 }
-
-module.exports = {
-  applyPatch,
-  undoPatch
-};

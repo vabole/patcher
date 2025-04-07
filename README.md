@@ -8,6 +8,8 @@ A tool for monkey-patching installed npm packages without modifying their source
 npm install -g @vabole/patcher
 ```
 
+**Note:** Requires Node.js 22 or newer.
+
 For local development:
 ```
 git clone https://github.com/vabole/patcher.git
