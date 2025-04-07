@@ -1,0 +1,24 @@
+{
+  "name": "patcher",
+  "version": "0.1.0",
+  "description": "Tool for patching npm packages",
+  "main": "src/index.js",
+  "bin": {
+    "patcher": "./src/cli.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "patch",
+    "npm",
+    "monkey-patch"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "js-beautify": "^1.14.9",
+    "commander": "^11.1.0",
+    "chalk": "^4.1.2"
+  }
+}
