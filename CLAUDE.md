@@ -9,9 +9,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Patch test: `npm run test:patch`
 - Undo patch test: `npm run test:undo`
 
+## Publishing
+IMPORTANT: Always use GitHub Actions CI for publishing to npm. npm tokens are stored in GitHub Secrets.
+
+To publish a new version:
+1. Update the version in package.json
+2. Push changes to GitHub
+3. Create a new tag: `git tag v0.1.x && git push origin v0.1.x`
+4. CI will automatically publish the package to npm
+
+DO NOT publish directly with `npm publish` from local environments.
+
 ## Code Style Guidelines
 - **Formatting**: Use 2-space indentation for JavaScript
-- **Imports**: Use CommonJS (`require`/`module.exports`) pattern
+- **Imports**: Use ES Modules (`import`/`export`) pattern
 - **Error handling**: Use try/catch with descriptive error messages
 - **Documentation**: Use JSDoc for function documentation
 - **Naming**: Use camelCase for variables/functions
