@@ -12,7 +12,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Publishing
 ⚠️ **EXTREMELY IMPORTANT**: NEVER attempt to publish with `npm publish` directly. ALWAYS use GitHub CI for publishing.
 
-The package MUST be published ONLY through GitHub Actions CI. npm tokens are securely stored in GitHub Secrets.
+🔴 **CRITICAL**: The package is published EXCLUSIVELY through GitHub Actions CI. NEVER use local npm commands for publishing!
+
+The publishing process is FULLY AUTOMATED via GitHub Actions workflow:
+- npm tokens are securely stored in GitHub Secrets
+- Authentication and publishing happen in the CI environment
+- Local credentials should NEVER be used
 
 To publish a new version:
 1. Update the version in both package.json AND src/cli.js
@@ -20,7 +25,13 @@ To publish a new version:
 3. Create a new tag: `git tag v0.3.x && git push origin v0.3.x`
 4. GitHub CI will automatically publish the package to npm
 
-❌ NEVER run `npm publish` or `npm login` locally - this will fail and potentially expose credentials.
+❌ STRICTLY FORBIDDEN:
+- NEVER run `npm publish` locally
+- NEVER run `npm login` locally 
+- NEVER attempt manual authentication or publishing
+- NEVER share or expose npm credentials
+
+These actions will ALWAYS fail and potentially expose credentials.
 
 ## Code Style Guidelines
 - **Formatting**: Use 2-space indentation for JavaScript
@@ -31,12 +42,13 @@ To publish a new version:
 - **Structure**: Keep modules focused on single responsibilities
 - **String replacement**: Use direct string replacement (`string.replace`)
 - **Input validation**: Validate inputs at function start
-- **Configuration**: JSON-based configuration for patching rules
+- **Configuration**: Supports both JSON and JavaScript module configuration formats
 
 ## Project Structure
 - **src/index.js**: Core patching functionality
 - **src/cli.js**: Command-line interface
-- **local-config.json**: Example config for patching local packages
+- **local-config.json**: Example JSON config for patching local packages
+- **example-config.js**: Example JavaScript module config with template literals
 - **local-test-runner.js**: Script to test the patching results
 
 ## Testing
