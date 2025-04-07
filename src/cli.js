@@ -13,7 +13,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 program
   .name('patcher')
   .description('Patch installed npm packages')
-  .version('0.3.0')
+  .version('0.3.1')
   .argument('<config>', 'Path to configuration file')
   .option('-u, --undo', 'Undo previous patches')
   .action(async (configPath, options) => {
