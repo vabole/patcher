@@ -10,15 +10,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Undo patch test: `npm run test:undo`
 
 ## Publishing
-IMPORTANT: Always use GitHub Actions CI for publishing to npm. npm tokens are stored in GitHub Secrets.
+⚠️ **EXTREMELY IMPORTANT**: NEVER attempt to publish with `npm publish` directly. ALWAYS use GitHub CI for publishing.
+
+The package MUST be published ONLY through GitHub Actions CI. npm tokens are securely stored in GitHub Secrets.
 
 To publish a new version:
-1. Update the version in package.json
-2. Push changes to GitHub
-3. Create a new tag: `git tag v0.1.x && git push origin v0.1.x`
-4. CI will automatically publish the package to npm
+1. Update the version in both package.json AND src/cli.js
+2. Commit and push changes to GitHub
+3. Create a new tag: `git tag v0.3.x && git push origin v0.3.x`
+4. GitHub CI will automatically publish the package to npm
 
-DO NOT publish directly with `npm publish` from local environments.
+❌ NEVER run `npm publish` or `npm login` locally - this will fail and potentially expose credentials.
 
 ## Code Style Guidelines
 - **Formatting**: Use 2-space indentation for JavaScript
