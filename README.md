@@ -5,12 +5,12 @@ A tool for monkey-patching installed npm packages without modifying their source
 ## Installation
 
 ```
-npm install -g patcher
+npm install -g @vabole/patcher
 ```
 
 For local development:
 ```
-git clone https://github.com/yourusername/patcher.git
+git clone https://github.com/vabole/patcher.git
 cd patcher
 npm install
 ```
@@ -47,10 +47,22 @@ Or use a global npm package name:
 ### Apply Patches
 
 ```
+npx @vabole/patcher patch-config.json
+```
+
+Or if installed globally:
+
+```
 patcher patch-config.json
 ```
 
 ### Undo Patches
+
+```
+npx @vabole/patcher --undo patch-config.json
+```
+
+Or if installed globally:
 
 ```
 patcher --undo patch-config.json
