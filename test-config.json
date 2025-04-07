@@ -1,0 +1,7 @@
+{
+  "globalNpmPackage": "is-odd",
+  "beautify": true,
+  "replacements": [
+    ["return (n % 2) === 1;", "if (n === 0) { throw new Error('zero is not allowed'); } return (n % 2) === 1;"]
+  ]
+}
