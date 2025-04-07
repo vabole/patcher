@@ -1,5 +1,5 @@
 {
-  "globalNpmPackage": "@anthropic-ai/claude-code",
+  "globalNpmPackage": "is-odd",
   "beautify": true,
   "targetFile": "lib/main.js",
   "replacements": [
