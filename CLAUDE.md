@@ -2,6 +2,28 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Development Workflow
+
+### Branch and PR Strategy
+
+1. **ALWAYS** follow this workflow for new features, bugfixes, or improvements:
+   - Create a feature branch from main: `git checkout -b feature/my-feature`
+   - Make changes on that branch
+   - Push the branch: `git push -u origin feature/my-feature`
+   - Create a PR with a clear, concise description of the changes
+   - Merge the PR to main after review
+
+2. **NEVER** commit directly to main, except for:
+   - Version updates for publishing (done by the publish script)
+   - Documentation updates that don't affect functionality
+   
+3. **PR Descriptions** should be clear and concise, explaining:
+   - What was changed
+   - Why it was changed
+   - Any special considerations or implications for users
+
+This workflow creates a cleaner history and makes it easier to understand changes.
+
 ## Commands
 - Install: `npm install`
 - Run with config file: `node src/cli.js <config-file>` or `npm run patcher <config-file>`
@@ -105,16 +127,21 @@ These actions will ALWAYS fail and potentially expose credentials.
 - **src/index.js**: Core patching functionality
 - **src/cli.js**: Command-line interface
 - **src/home-config.js**: Home directory configuration management
+- **scripts/publish.js**: Automated version updating and publishing script
 - **local-config.js**: Example JS config for patching local packages
 - **example-config.js**: Example JavaScript module config with template literals
 - **local-test-runner.js**: Script to test the patching results
 - **test.js**: Simple test script for verifying patching functionality
 - **test/home-config.test.js**: Test for home directory configuration feature
+- **test/special-package-test.js**: Test for packages with special characters in names
+- **test/fixtures/packages/is-even/**: Test package with special characters in name (@patcher-test/is-even)
 
 ## Testing
 - `npm test`: Run full test suite (patch, verify, undo)
 - `npm run test:patch`: Apply patches to local is-odd package
 - `npm run test:undo`: Revert patches
+- `npm run test:home-config`: Test home directory configuration feature
+- `npm run test:special-package`: Test patching packages with special characters in names
 - `node local-test-runner.js`: Test if patching was successful
 
 When testing, ensure you:
@@ -122,3 +149,4 @@ When testing, ensure you:
 2. Clear Node.js module cache when testing modifications 
 3. Run tests in expected order (test → patch → test → undo → test)
 4. Verify that patches can be applied and undone correctly
+5. Test with both regular and scoped package names (with @ and /)
