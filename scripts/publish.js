@@ -173,11 +173,26 @@ To publish, either:
       console.warn(`Run: git push origin v${version}`);
     }
     
-    console.log(`\n✅ Version update steps completed!`);
-    console.log(`\nTo complete publishing:`);
-    console.log(`1. Create a PR: gh pr create --title "Update version to ${version}" --body "Version update to ${version}"`);
-    console.log(`2. Merge the PR to main when approved`);
-    console.log(`3. The package will be published by GitHub Actions based on the v${version} tag`);
+    // Create PR automatically
+    console.log(`\nCreating PR for version ${version}...`);
+    try {
+      const prTitle = `Update version to ${version}`;
+      const prBody = `## Version ${version}
+
+This PR updates the package version to ${version}.
+
+The version tag has already been created and pushed, which will trigger publishing once this PR is merged.`;
+      
+      execSync(`gh pr create --title "${prTitle}" --body "${prBody}"`, { stdio: 'inherit' });
+      console.log('\n✅ PR created successfully!');
+      console.log('\nNext steps:');
+      console.log('1. Wait for CI checks to pass on the PR');
+      console.log('2. Merge the PR to main');
+      console.log('3. The package will be automatically published by GitHub Actions');
+    } catch (prError) {
+      console.warn('\nCould not automatically create PR. Please create it manually:');
+      console.warn(`gh pr create --title "Update version to ${version}" --body "Version update to ${version}"`);
+    }
   } catch (error) {
     console.error('Error in Git operations:', error.message);
     process.exit(1);

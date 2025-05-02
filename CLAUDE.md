@@ -101,78 +101,45 @@ The publishing process is FULLY AUTOMATED via GitHub Actions workflow:
 - Authentication and publishing happen in the CI environment
 - Local credentials should NEVER be used
 
-### Publishing Process (One-Command Approach)
+### Publishing a New Version
 
-The publishing process is designed to work with branch protection and consists of three steps:
-1. Run a publish command to create a feature branch, update version numbers, and create a tag
-2. Create a PR to merge changes to main
-3. GitHub Actions automatically publishes the package when it detects the tag
-
-#### Single-Command Publishing (Recommended)
-
-To publish a new version in one command, simply run one of these from the main branch:
+To publish a new version, just run **one** of these commands from the main branch:
 
 ```bash
-# Interactive mode - will prompt for version type
-npm run publish:version
-
-# Patch version bump (1.2.3 -> 1.2.4)
-npm run publish:patch
-
-# Minor version bump (1.2.0 -> 1.3.0)
-npm run publish:minor
-
-# Major version bump (1.0.0 -> 2.0.0)
-npm run publish:major
+npm run publish:patch  # For bug fixes (1.2.3 → 1.2.4)
+npm run publish:minor  # For new features (1.2.0 → 1.3.0)
+npm run publish:major  # For breaking changes (1.0.0 → 2.0.0)
 ```
 
-The script will:
-1. Automatically create a feature branch (e.g., feature/version-update-2.1.0)
-2. Update versions in both package.json AND src/cli.js
-3. Commit and push changes to GitHub
+This single command will:
+1. Create a feature branch
+2. Update versions in package.json and src/cli.js
+3. Commit and push changes
 4. Create and push a version tag
-5. Provide instructions for creating a PR
+5. Create a PR using GitHub CLI
 
-After running the script, follow the instructions to:
-1. Create a PR using GitHub CLI: `gh pr create`
-2. Merge the PR to main when approved
+Then just:
+1. Wait for CI checks to pass on the PR
+2. Merge the PR to main
+3. The package is automatically published when GitHub Actions detects the tag
 
-The package will be published automatically by GitHub Actions when it detects the tag.
+That's it!
 
-#### Advanced Usage Options
+#### What Triggers Publishing?
 
-If you're not on the main branch or want more control:
+Publishing happens automatically when GitHub Actions detects:
+- A tag that starts with "v" (e.g., v2.1.0)
 
+#### Options for Special Cases
+
+For more control in special situations:
 ```bash
-# Specify a custom branch name
-npm run publish:minor -- --branch feature/my-version-branch
+# Specify exact version
+npm run publish:version -- --version 3.0.0 --yes
 
-# Specify an exact version instead of auto-incrementing
-npm run publish:version -- --version 3.2.1 --yes
-
-# Test what would happen without making changes
+# Dry run (no changes)
 npm run publish:dry-run
 ```
-
-#### Publishing Triggers
-
-Publishing is triggered when ANY of these conditions are met:
-1. A tag is pushed that starts with "v" (e.g., v2.1.0)
-2. A GitHub release is created
-3. A commit is pushed to main with "version" in the commit message
-
-### Manual Publishing Process (Alternative)
-
-If you need to perform the version update steps manually:
-1. Create a feature branch: `git checkout -b feature/version-update-x.y.z`
-2. Update the version in both package.json AND src/cli.js
-3. Commit changes: `git add package.json src/cli.js && git commit -m "Update version to x.y.z"`
-4. Push branch: `git push -u origin feature/version-update-x.y.z` 
-5. Create a tag: `git tag vx.y.z && git push origin vx.y.z`
-6. Create a PR and merge the changes to main
-7. GitHub Actions will automatically publish when it detects the tag
-
-The key is pushing the tag (step 5), as this is what triggers the publishing workflow.
 
 ❌ STRICTLY FORBIDDEN:
 - NEVER run `npm publish` locally
