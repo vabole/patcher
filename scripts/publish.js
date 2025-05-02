@@ -127,21 +127,24 @@ function createAndPushTag(version, options) {
     // Check if we're on allowed branch
     const allowedBranch = options.branch || `feature/version-update-${version}`;
     const isBranchSpecified = !!options.branch;
-    let currentBranch = execSync('git branch --show-current', { encoding: 'utf8' }).trim();
-    const isMainBranch = currentBranch === 'main';
-    const isVersionBranch = currentBranch.startsWith('feature/version-update');
+    
+    // Track both initial and working branch for clarity
+    const initialBranch = execSync('git branch --show-current', { encoding: 'utf8' }).trim();
+    let workingBranch = initialBranch;
+    const isMainBranch = initialBranch === 'main';
+    const isVersionBranch = initialBranch.startsWith('feature/version-update');
     
     // If we're on main and no branch is specified, auto-create a feature branch
     if (isMainBranch && !isBranchSpecified) {
       console.log(`Creating feature branch ${allowedBranch} for version update...`);
       execSync(`git checkout -b ${allowedBranch}`, { stdio: 'inherit' });
-      // Update currentBranch to the newly created branch
-      currentBranch = allowedBranch;
-    } else if (currentBranch !== allowedBranch && !isVersionBranch) {
-      throw new Error(`You are on branch '${currentBranch}'. 
+      // Update workingBranch to the newly created branch
+      workingBranch = allowedBranch;
+    } else if (workingBranch !== allowedBranch && !isVersionBranch) {
+      throw new Error(`You are on branch '${workingBranch}'. 
 To publish, either:
 1. Create a feature branch first: git checkout -b feature/version-update-${version}
-2. Specify your branch with --branch: npm run publish:minor -- --branch ${currentBranch}`);
+2. Specify your branch with --branch: npm run publish:minor -- --branch ${workingBranch}`);
     }
     
     if (options.dryRun) {
@@ -157,14 +160,14 @@ To publish, either:
     execSync(`git commit -m "Update version to ${version}"`, { stdio: 'inherit' });
     
     // Push the feature branch
-    console.log(`Pushing branch ${currentBranch}...`);
+    console.log(`Pushing branch ${workingBranch}...`);
     let branchPushed = false;
     try {
-      execSync(`git push -u origin ${currentBranch}`, { stdio: 'inherit' });
+      execSync(`git push -u origin ${workingBranch}`, { stdio: 'inherit' });
       branchPushed = true;
     } catch (pushError) {
       console.warn(`Warning: Could not push branch. You may need to push manually.`);
-      console.warn(`Run: git push -u origin ${currentBranch}`);
+      console.warn(`Run: git push -u origin ${workingBranch}`);
     }
     
     // Create and push tag
@@ -199,7 +202,7 @@ This PR updates the package version to ${version}.
 The version tag has already been created and pushed, which will trigger publishing once this PR is merged.`;
         
         // Explicitly specify the head branch to avoid confusion
-        execSync(`gh pr create --title "${prTitle}" --body "${prBody}" --head ${currentBranch}`, { stdio: 'inherit' });
+        execSync(`gh pr create --title "${prTitle}" --body "${prBody}" --head ${workingBranch}`, { stdio: 'inherit' });
         console.log('\n✅ PR created successfully!');
         console.log('\nNext steps:');
         console.log('1. Wait for CI checks to pass on the PR');
@@ -207,12 +210,12 @@ The version tag has already been created and pushed, which will trigger publishi
         console.log('3. The package will be automatically published by GitHub Actions');
       } catch (prError) {
         console.warn('\nCould not automatically create PR. Please create it manually:');
-        console.warn(`gh pr create --title "Update version to ${version}" --body "Version update to ${version}" --head ${currentBranch}`);
+        console.warn(`gh pr create --title "Update version to ${version}" --body "Version update to ${version}" --head ${workingBranch}`);
       }
     } else {
       console.warn('\nSkipping PR creation because branch push failed.');
       console.warn('After pushing the branch manually, create a PR:');
-      console.warn(`gh pr create --title "Update version to ${version}" --body "Version update to ${version}" --head ${currentBranch}`);
+      console.warn(`gh pr create --title "Update version to ${version}" --body "Version update to ${version}" --head ${workingBranch}`);
     }
   } catch (error) {
     console.error('Error in Git operations:', error.message);
