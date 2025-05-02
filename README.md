@@ -19,6 +19,13 @@ npm install
 
 ## Usage
 
+There are two ways to use patcher:
+
+1. **Configuration File Approach**: Create and specify a configuration file
+2. **Package Name Approach**: Use package names directly with configurations stored in `~/.patcher/`
+
+### Option 1: Using Configuration Files
+
 Create a configuration file (e.g., `patch-config.json` or `patch-config.js`):
 
 ```json
@@ -46,7 +53,7 @@ Or use a global npm package name:
 }
 ```
 
-### Apply Patches
+#### Apply Patches with Config File
 
 ```
 npx @vabole/patcher patch-config.json
@@ -58,7 +65,7 @@ Or if installed globally:
 patcher patch-config.json
 ```
 
-### Undo Patches
+#### Undo Patches with Config File
 
 ```
 npx @vabole/patcher --undo patch-config.json
@@ -68,6 +75,30 @@ Or if installed globally:
 
 ```
 patcher --undo patch-config.json
+```
+
+### Option 2: Using Package Names Directly
+
+You can store package configurations in your home directory at `~/.patcher/` and use package names directly.
+
+#### Create a Configuration File
+
+```
+patcher --create is-odd
+```
+
+This creates a default configuration file at `~/.patcher/is-odd.json` that you can edit to add your replacements.
+
+#### Apply Patches with Package Name
+
+```
+patcher is-odd
+```
+
+#### Undo Patches with Package Name
+
+```
+patcher --undo is-odd
 ```
 
 ## Configuration Options
@@ -80,6 +111,25 @@ patcher --undo patch-config.json
 | `targetFile` | string | (Optional) Specific file to patch, overriding normal entry point resolution |
 | `beautify` | boolean | (Optional) Whether to beautify the code before patching (default: true) |
 | `replacements` | array | Array of [original, replacement] string pairs |
+
+## Home Directory Configuration
+
+When using package names directly, patcher looks for configuration files in the `~/.patcher/` directory. For each package, you can have either:
+
+- `~/.patcher/<package-name>.json` - JSON configuration file
+- `~/.patcher/<package-name>.js` - JavaScript module configuration file
+
+If both exist, the JSON file takes precedence.
+
+### Creating Default Configuration
+
+You can create a default configuration file with:
+
+```
+patcher --create <package-name>
+```
+
+This generates a basic JSON configuration file that you can edit to add your specific replacements.
 
 ## Configuration Formats
 
