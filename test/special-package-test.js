@@ -80,10 +80,14 @@ async function createTestConfig() {
     const packageName = '@patcher-test/is-even';
     const configPath = await homeConfig.createDefaultConfig(packageName);
     
+    // Get the path to the locally installed package
+    const packagePath = path.resolve(__dirname, 'node_modules', packageName, 'index.js');
+    console.log(`Local package path: ${packagePath}`);
+    
     // Update the configuration with our desired patches
     const configContent = `// Configuration for ${packageName} package
 export default {
-  globalNpmPackage: "${packageName}",
+  packagePath: "${packagePath.replace(/\\/g, '\\\\')}",
   beautify: true,
   replacements: [
     [
