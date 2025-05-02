@@ -57,11 +57,20 @@ function cleanup() {
 function installTestPackage() {
   console.log('Installing test package...');
   try {
-    // First, switch to the test directory
-    process.chdir(__dirname);
+    // We need to install at the project root
+    const projectRoot = path.resolve(__dirname, '..');
+    
+    // Remember the original directory to restore it later
+    const originalDir = process.cwd();
+    
+    // Change to the project root directory
+    process.chdir(projectRoot);
     
     // Install the local package
     execSync(`npm install ${TEST_PACKAGE_DIR}`, { stdio: 'inherit' });
+    
+    // Change back to the original directory
+    process.chdir(originalDir);
     
     console.log('Test package installed successfully');
   } catch (error) {
@@ -80,8 +89,9 @@ async function createTestConfig() {
     const packageName = '@patcher-test/is-even';
     const configPath = await homeConfig.createDefaultConfig(packageName);
     
-    // Get the path to the locally installed package
-    const packagePath = path.resolve(__dirname, 'node_modules', packageName, 'index.js');
+    // Get the path to the locally installed package - note that npm installs packages at the project root
+    const projectRoot = path.resolve(__dirname, '..');
+    const packagePath = path.resolve(projectRoot, 'node_modules', packageName, 'index.js');
     console.log(`Local package path: ${packagePath}`);
     
     // Update the configuration with our desired patches
