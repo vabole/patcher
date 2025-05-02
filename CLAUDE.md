@@ -161,6 +161,25 @@ These actions will ALWAYS fail and potentially expose credentials.
 - **Configuration**: Uses JavaScript module format (.js) for configuration files
 - **Consistency**: Follow existing patterns in the codebase
 
+## Development Best Practices
+
+### Safety and Quality Checks
+- 🔴 **NEVER bypass or disable safety checks**, linting, or tests
+- 🔴 **NEVER ignore failing tests** - always fix the underlying issue
+- If a check is failing, it's likely protecting you from introducing a bug or inconsistency
+- Address the root cause of issues rather than working around them
+
+### Temporary Files
+- Always clean up temporary files and branches after creating them
+- Don't leave test artifacts in the repository
+- Use `git clean -n` to preview what would be removed before running `git clean -f`
+- Be especially careful when generating files in test directories
+
+### Error Handling
+- When encountering errors, solve the underlying issue rather than bypassing them
+- If you hit a CI failure, diagnose and fix the root cause 
+- Consider whether errors indicate design issues that need addressing
+
 ## Project Structure
 - **src/index.js**: Core patching functionality
 - **src/cli.js**: Command-line interface
