@@ -12,14 +12,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TEST_PACKAGE_DIR = path.join(__dirname, 'fixtures', 'packages', 'is-even');
 const HOME_DIR = path.join(__dirname, 'fixtures', 'home');
 
-// Mock the homedir function for testing
+// Set the environment variable for testing
 process.env.PATCHER_TEST_HOME = HOME_DIR;
-
-// Override the getConfigDir function for testing
-const originalGetConfigDir = homeConfig.getConfigDir;
-homeConfig.getConfigDir = () => {
-  return path.join(HOME_DIR, '.patcher');
-};
 
 // Create the mock home directory
 if (!fs.existsSync(HOME_DIR)) {
@@ -213,9 +207,6 @@ async function main() {
     console.error('Test failed:', error.message);
     cleanup();
     process.exit(1);
-  } finally {
-    // Restore the original getConfigDir function
-    homeConfig.getConfigDir = originalGetConfigDir;
   }
 }
 

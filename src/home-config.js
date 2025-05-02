@@ -3,12 +3,19 @@ import path from 'node:path';
 import os from 'node:os';
 
 /**
+ * Gets the home directory path, with support for test override
+ * @returns {string} The home directory path
+ */
+export function getHomeDir() {
+  return process.env.PATCHER_TEST_HOME || os.homedir();
+}
+
+/**
  * Gets the path to the patcher configuration directory in the user's home directory
  * @returns {string} Path to the configuration directory
  */
 export function getConfigDir() {
-  // Allow overriding the home directory for testing
-  const homeDir = process.env.PATCHER_TEST_HOME || os.homedir();
+  const homeDir = getHomeDir();
   return path.join(homeDir, '.patcher');
 }
 
