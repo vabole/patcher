@@ -1,6 +1,15 @@
 # Patcher
 
-A tool for monkey-patching installed npm packages without modifying their source code repositories.
+Ever needed to fix a bug in a dependency but didn't want to fork the whole repo? Patcher lets you modify npm packages in your node_modules without touching the original source.
+
+It's like hot-patching in production, but for your dependencies:
+
+- Fix that one annoying bug in a package that's blocking you
+- Add that missing feature you need without maintaining a fork
+- Test your changes before submitting a PR upstream
+- Apply the same patches across your team or in CI
+
+And when the package finally gets updated, just remove the patch and move on.
 
 ## Installation
 
