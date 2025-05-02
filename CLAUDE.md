@@ -115,23 +115,25 @@ git checkout -b feature/version-update-x.y.z
 To publish a new version using the interactive script:
 
 ```bash
-npm run publish:version
+# Use --branch flag to allow running on a feature branch
+npm run publish:version -- --branch feature/version-update-x.y.z
 ```
 
 This script will:
-1. Check if you're on the main branch (will fail due to branch protection)
+1. Check if you're on the specified branch (default: main)
 2. Verify there are no uncommitted changes
 3. Show current versions and prompt for the type of version bump (major, minor, patch, or custom)
 4. Update versions in both package.json AND src/cli.js
-5. Attempt to commit and push changes to GitHub (will fail on protected branches)
+5. Attempt to commit and push changes to GitHub (will fail if branch is protected)
 
-If the script fails due to branch protection rules, you'll need to manually:
+If you don't use the --branch flag or if the script fails due to branch protection, you'll need to manually:
 1. Add the changed files: `git add package.json src/cli.js`
 2. Commit the changes: `git commit -m "Update version to x.y.z"`
 3. Push the branch: `git push -u origin feature/version-update-x.y.z`
 4. Create a tag: `git tag vx.y.z`
 5. Push the tag: `git push origin vx.y.z`
 6. Create a PR and merge it to main
+7. GitHub Actions will publish the package when the tag is pushed
 
 #### Non-Interactive Mode (for CI/CD)
 
@@ -139,13 +141,13 @@ For automated environments, use one of these non-interactive commands on a featu
 
 ```bash
 # Bump patch version (0.0.x)
-npm run publish:patch
+npm run publish:patch -- --branch feature/version-update-x.y.z
 
 # Bump minor version (0.x.0)
-npm run publish:minor
+npm run publish:minor -- --branch feature/version-update-x.y.z
 
 # Bump major version (x.0.0)
-npm run publish:major
+npm run publish:major -- --branch feature/version-update-x.y.z
 
 # Test what would happen without making changes
 npm run publish:dry-run
@@ -155,22 +157,29 @@ You can also use the publish script directly with more options:
 
 ```bash
 # Specify a custom version
-node scripts/publish.js --version 1.2.3 --yes
+node scripts/publish.js --version 1.2.3 --yes --branch feature/version-update-1.2.3
 
-# Allow publishing from a different branch
+# Allow publishing from a specific branch (REQUIRED with branch protection)
 node scripts/publish.js --type minor --branch feature/my-branch --yes
 
 # Skip git operations
 node scripts/publish.js --type patch --no-git --yes
 ```
 
+**IMPORTANT**: With main branch protection enabled:
+1. Always use the `--branch` option to specify your feature branch name
+2. When the script succeeds, create a PR to merge changes to main
+3. GitHub Actions will publish when the tag is detected
+
 ### Manual Publishing (Not Recommended)
 
 If you need to manually publish (avoid this if possible):
-1. Update the version in both package.json AND src/cli.js
-2. Commit and push changes to GitHub
-3. Create a new tag: `git tag v0.3.x && git push origin v0.3.x`
-4. GitHub CI will automatically publish the package to npm
+1. Create a feature branch: `git checkout -b feature/version-update-x.y.z`
+2. Update the version in both package.json AND src/cli.js
+3. Commit and push changes to GitHub
+4. Create a new tag: `git tag vx.y.z && git push origin vx.y.z`
+5. Create a PR and merge the changes to main
+6. GitHub CI will automatically publish the package to npm when it detects the tag
 
 ❌ STRICTLY FORBIDDEN:
 - NEVER run `npm publish` locally
