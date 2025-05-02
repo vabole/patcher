@@ -9,6 +9,13 @@ It's like hot-patching in production, but for your dependencies:
 - Test your changes before submitting a PR upstream
 - Apply the same patches across your team or in CI
 
+Patcher makes it easy to:
+
+1. Create a configuration for a package: `patcher --create package-name`
+2. Edit the generated config file to define your patches
+3. Apply patches with a simple command: `patcher package-name`
+4. Undo patches when needed: `patcher --undo package-name`
+
 And when the package finally gets updated, just remove the patch and move on.
 
 ## Installation
@@ -28,71 +35,11 @@ npm install
 
 ## Usage
 
-There are two ways to use patcher:
+Patcher uses package names directly with configurations stored in `~/.patcher/`. You can also use specific configuration files with the `--file` option.
 
-1. **Configuration File Approach**: Create and specify a configuration file
-2. **Package Name Approach**: Use package names directly with configurations stored in `~/.patcher/`
+> **Migration Note (v2.0.0)**: The CLI has been streamlined to use package names as the primary approach. If you were previously using the configuration file approach directly, you now need to specify the `--file` flag: `patcher package-name --file config-file.js`.
 
-### Option 1: Using Configuration Files
-
-Create a JavaScript configuration file (e.g., `patch-config.js`):
-
-```js
-// patch-config.js
-export default {
-  packagePath: "/path/to/node_modules/package-to-patch/dist/index.js",
-  beautify: true,
-  replacements: [
-    ["original string 1", "replacement string 1"],
-    ["original string 2", "replacement string 2"]
-  ]
-}
-```
-
-Or use a global npm package name:
-
-```js
-// patch-config.js
-export default {
-  globalNpmPackage: "package-name",
-  relativePath: "index.js",
-  beautify: true,
-  replacements: [
-    ["original string 1", "replacement string 1"],
-    ["original string 2", "replacement string 2"]
-  ]
-}
-```
-
-#### Apply Patches with Config File
-
-```
-npx @vabole/patcher patch-config.js
-```
-
-Or if installed globally:
-
-```
-patcher patch-config.js
-```
-
-#### Undo Patches with Config File
-
-```
-npx @vabole/patcher --undo patch-config.js
-```
-
-Or if installed globally:
-
-```
-patcher --undo patch-config.js
-```
-
-### Option 2: Using Package Names Directly
-
-You can store package configurations in your home directory at `~/.patcher/` and use package names directly.
-
-#### Create a Configuration File
+### Create a Configuration File
 
 ```
 patcher --create is-odd
@@ -100,16 +47,55 @@ patcher --create is-odd
 
 This creates a default configuration file at `~/.patcher/is-odd.js` that you can edit to add your replacements.
 
-#### Apply Patches with Package Name
+### Apply Patches
 
 ```
 patcher is-odd
 ```
 
-#### Undo Patches with Package Name
+### Undo Patches
 
 ```
 patcher --undo is-odd
+```
+
+### Using a Specific Configuration File
+
+You can also use a specific configuration file instead of the one in `~/.patcher/`:
+
+```
+patcher is-odd --file ./my-is-odd-config.js
+```
+
+This is useful for one-off patches or when sharing configurations across teams without modifying `~/.patcher/`.
+
+### Configuration File Format
+
+Create a JavaScript configuration file (e.g., `is-odd-config.js`):
+
+```js
+// JavaScript module format (.js files)
+export default {
+  globalNpmPackage: "is-odd",
+  beautify: true,
+  replacements: [
+    ["original string 1", "replacement string 1"],
+    ["original string 2", "replacement string 2"]
+  ]
+}
+```
+
+Or specify a direct path:
+
+```js
+export default {
+  packagePath: "/path/to/node_modules/is-odd/index.js",
+  beautify: true,
+  replacements: [
+    ["original string 1", "replacement string 1"],
+    ["original string 2", "replacement string 2"]
+  ]
+}
 ```
 
 ## Configuration Options

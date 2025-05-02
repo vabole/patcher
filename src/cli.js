@@ -14,19 +14,30 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 program
   .name('patcher')
   .description('Patch installed npm packages')
-  .version('1.2.0')
-  .argument('<package-or-config>', 'Package name or path to configuration file')
+  .version('2.0.0')
+  .argument('<package-name>', 'Package name to patch')
+  .option('-f, --file <config-file>', 'Use a specific configuration file instead of looking in ~/.patcher')
   .option('-u, --undo', 'Undo previous patches')
   .option('-c, --create', 'Create a default configuration file for the package in ~/.patcher')
-  .action(async (packageOrConfig, options) => {
+  .action(async (packageName, options) => {
     try {
       let config;
-      const isPackageName = !packageOrConfig.includes('/') && 
-                           !packageOrConfig.endsWith('.js');
       
-      if (isPackageName) {
+      if (options.file) {
+        // Configuration file path provided via --file flag
+        const configPath = options.file;
+        console.log(chalk.blue(`Using configuration file: ${configPath}`));
+        
+        // Only support .js config files
+        if (!configPath.endsWith('.js')) {
+          console.error(chalk.red('Error: Only JavaScript (.js) configuration files are supported.'));
+          console.log(chalk.blue('Please convert your configuration to a .js file.'));
+          process.exit(1);
+        }
+        
+        config = (await import(path.resolve(configPath))).default;
+      } else {
         // Package name provided - look for configuration in ~/.patcher
-        const packageName = packageOrConfig;
         console.log(chalk.blue(`Looking for configuration for ${packageName} in ~/.patcher`));
         
         if (options.create) {
@@ -41,22 +52,9 @@ program
         
         if (!config) {
           console.error(chalk.red(`No configuration found for ${packageName} in ~/.patcher`));
-          console.log(chalk.blue(`Use --create to create a default configuration file, or provide a path to a configuration file.`));
+          console.log(chalk.blue(`Use --create to create a default configuration file, or provide a specific configuration file with --file option.`));
           process.exit(1);
         }
-      } else {
-        // Configuration file path provided
-        const configPath = packageOrConfig;
-        console.log(chalk.blue(`Using configuration file: ${configPath}`));
-        
-        // Only support .js config files
-        if (!configPath.endsWith('.js')) {
-          console.error(chalk.red('Error: Only JavaScript (.js) configuration files are supported.'));
-          console.log(chalk.blue('Please convert your configuration to a .js file.'));
-          process.exit(1);
-        }
-        
-        config = (await import(path.resolve(configPath))).default;
       }
       
       if (options.undo) {

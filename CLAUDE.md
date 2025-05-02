@@ -41,10 +41,12 @@ This workflow creates a cleaner history and makes it easier to understand change
 
 ## Commands
 - Install: `npm install`
-- Run with config file: `node src/cli.js <config-file>` or `npm run patcher <config-file>`
-- Run with package name: `node src/cli.js <package-name>` (uses config from ~/.patcher)
+- Run: `node src/cli.js <package-name>` or `npm run patcher <package-name>`
 - Create config: `node src/cli.js --create <package-name>` (creates in ~/.patcher)
+- Run with specific config file: `node src/cli.js <package-name> --file <config-file>`
+- Undo patches: `node src/cli.js --undo <package-name>`
 - Test: `npm test`
+- Test streamlined CLI: `npm run test:cli-streamlined`
 - Patch test: `npm run test:patch`
 - Undo patch test: `npm run test:undo`
 - Home config test: `npm run test:home-config`
