@@ -22,8 +22,7 @@ program
     try {
       let config;
       const isPackageName = !packageOrConfig.includes('/') && 
-                           !packageOrConfig.endsWith('.js') && 
-                           !packageOrConfig.endsWith('.json');
+                           !packageOrConfig.endsWith('.js');
       
       if (isPackageName) {
         // Package name provided - look for configuration in ~/.patcher
@@ -50,10 +49,14 @@ program
         const configPath = packageOrConfig;
         console.log(chalk.blue(`Using configuration file: ${configPath}`));
         
-        // Support both .json and .js config files
-        config = configPath.endsWith('.js') 
-          ? (await import(path.resolve(configPath))).default
-          : JSON.parse(fs.readFileSync(configPath, 'utf8'));
+        // Only support .js config files
+        if (!configPath.endsWith('.js')) {
+          console.error(chalk.red('Error: Only JavaScript (.js) configuration files are supported.'));
+          console.log(chalk.blue('Please convert your configuration to a .js file.'));
+          process.exit(1);
+        }
+        
+        config = (await import(path.resolve(configPath))).default;
       }
       
       if (options.undo) {

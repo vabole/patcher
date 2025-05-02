@@ -61,7 +61,6 @@ function runTest() {
     
     // Make sure our test fixtures exist
     assert(fs.existsSync(homeConfigDir), 'Test fixtures not found');
-    assert(fs.existsSync(path.join(homeConfigDir, 'is-odd.json')), 'is-odd.json not found');
     assert(fs.existsSync(path.join(homeConfigDir, 'is-odd.js')), 'is-odd.js not found');
     console.log('Test fixtures exist.');
     

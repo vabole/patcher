@@ -46,14 +46,14 @@ These actions will ALWAYS fail and potentially expose credentials.
 - **Structure**: Keep modules focused on single responsibilities
 - **String replacement**: Use direct string replacement (`string.replace`)
 - **Input validation**: Validate inputs at function start
-- **Configuration**: Supports both JSON and JavaScript module configuration formats
+- **Configuration**: Uses JavaScript module format (.js) for configuration files
 - **Consistency**: Follow existing patterns in the codebase
 
 ## Project Structure
 - **src/index.js**: Core patching functionality
 - **src/cli.js**: Command-line interface
 - **src/home-config.js**: Home directory configuration management
-- **local-config.json**: Example JSON config for patching local packages
+- **local-config.js**: Example JS config for patching local packages
 - **example-config.js**: Example JavaScript module config with template literals
 - **local-test-runner.js**: Script to test the patching results
 - **test.js**: Simple test script for verifying patching functionality

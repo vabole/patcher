@@ -1,0 +1,12 @@
+// Configuration for local is-odd package
+export default {
+  packagePath: "node_modules/is-odd/index.js",
+  beautify: false,
+  replacements: [
+    [
+      "module.exports = function isOdd(value) {", 
+      `module.exports = function isOdd(value) {
+  if (value === 0) throw new Error('zero is not allowed');`
+    ]
+  ]
+}

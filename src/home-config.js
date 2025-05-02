@@ -24,13 +24,7 @@ export function findPackageConfig(packageName) {
     return null;
   }
   
-  // Try JSON format first
-  const jsonPath = path.join(configDir, `${packageName}.json`);
-  if (fs.existsSync(jsonPath)) {
-    return jsonPath;
-  }
-  
-  // Then try JavaScript module format
+  // Only use JavaScript module format
   const jsPath = path.join(configDir, `${packageName}.js`);
   if (fs.existsSync(jsPath)) {
     return jsPath;
@@ -52,27 +46,15 @@ export async function loadPackageConfig(packageName) {
   }
   
   try {
-    if (configPath.endsWith('.js')) {
-      // Import JavaScript module
-      const config = (await import(path.resolve(configPath))).default;
-      
-      // Ensure globalNpmPackage is set if it isn't already
-      if (!config.globalNpmPackage && !config.packagePath) {
-        config.globalNpmPackage = packageName;
-      }
-      
-      return config;
-    } else {
-      // Read JSON file
-      const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-      
-      // Ensure globalNpmPackage is set if it isn't already
-      if (!config.globalNpmPackage && !config.packagePath) {
-        config.globalNpmPackage = packageName;
-      }
-      
-      return config;
+    // Import JavaScript module
+    const config = (await import(path.resolve(configPath))).default;
+    
+    // Ensure globalNpmPackage is set if it isn't already
+    if (!config.globalNpmPackage && !config.packagePath) {
+      config.globalNpmPackage = packageName;
     }
+    
+    return config;
   } catch (error) {
     throw new Error(`Failed to load configuration for ${packageName}: ${error.message}`);
   }
@@ -91,19 +73,22 @@ export async function createDefaultConfig(packageName) {
     fs.mkdirSync(configDir, { recursive: true });
   }
   
-  const configPath = path.join(configDir, `${packageName}.json`);
+  const configPath = path.join(configDir, `${packageName}.js`);
   
   // Create a default configuration file
-  const defaultConfig = {
-    globalNpmPackage: packageName,
-    beautify: true,
-    replacements: [
-      // Add a placeholder replacement
-      ["// Add your replacements here", "// Modified by patcher"]
+  const defaultConfigContent = `// Configuration for ${packageName} package
+export default {
+  globalNpmPackage: "${packageName}",
+  beautify: true,
+  replacements: [
+    [
+      "// Add your replacements here", 
+      "// Modified by patcher"
     ]
-  };
+  ]
+}`;
   
-  fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2), 'utf8');
+  fs.writeFileSync(configPath, defaultConfigContent, 'utf8');
   
   return configPath;
 }

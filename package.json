@@ -12,9 +12,9 @@
   },
   "scripts": {
     "patcher": "node src/cli.js",
-    "test": "node src/cli.js test-config.json && node local-test-runner.js && node src/cli.js --undo test-config.json",
-    "test:patch": "node src/cli.js local-config.json",
-    "test:undo": "node src/cli.js --undo local-config.json",
+    "test": "node src/cli.js test-config.js && node local-test-runner.js && node src/cli.js --undo test-config.js",
+    "test:patch": "node src/cli.js local-config.js",
+    "test:undo": "node src/cli.js --undo local-config.js",
     "test:home-config": "node test/run-home-config-test.js",
     "prepublishOnly": "npm test"
   },
