@@ -127,7 +127,7 @@ function createAndPushTag(version, options) {
     // Check if we're on allowed branch
     const allowedBranch = options.branch || `feature/version-update-${version}`;
     const isBranchSpecified = !!options.branch;
-    const currentBranch = execSync('git branch --show-current', { encoding: 'utf8' }).trim();
+    let currentBranch = execSync('git branch --show-current', { encoding: 'utf8' }).trim();
     const isMainBranch = currentBranch === 'main';
     const isVersionBranch = currentBranch.startsWith('feature/version-update');
     
