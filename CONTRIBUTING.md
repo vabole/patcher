@@ -16,7 +16,8 @@ Thank you for considering contributing to Patcher!
 
 1. Clone the repository
 2. Install dependencies: `npm install`
-3. Run tests: `npm test`
+3. Set up Git hooks (prevents accidental commits to main branch): `npm run dev:setup`
+4. Run tests: `npm test`
 
 ## Testing
 

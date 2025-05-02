@@ -21,7 +21,7 @@
     "test:bin-scoped-package": "node test/bin-scoped-package-test.js",
     "test:fix-verification": "node test/fix-verification-test.js",
     "test:cli-streamlined": "node test/run-cli-streamlined-test.js",
-    "postinstall": "node scripts/setup-git-hooks.js",
+    "dev:setup": "node scripts/setup-git-hooks.js",
     "setup-git-hooks": "node scripts/setup-git-hooks.js",
     "publish:version": "node scripts/publish.js",
     "publish:patch": "node scripts/publish.js --type patch --yes",
