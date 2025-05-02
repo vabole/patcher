@@ -14,7 +14,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 program
   .name('patcher')
   .description('Patch installed npm packages')
-  .version('2.0.0')
+  .version('2.1.0')
   .argument('<package-name>', 'Package name to patch')
   .option('-f, --file <config-file>', 'Use a specific configuration file instead of looking in ~/.patcher')
   .option('-u, --undo', 'Undo previous patches')

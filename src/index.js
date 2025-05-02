@@ -24,7 +24,51 @@ export function getGlobalPackagePath(packageName, relativePath = 'index.js', tar
       return path.join(npmRootPath, packageName, targetFile);
     }
     
-    return path.join(npmRootPath, packageName, relativePath);
+    // Check several possible paths for the package
+    const possiblePaths = [
+      // Standard path
+      path.join(npmRootPath, packageName, relativePath),
+      // GitHub Actions path structure (node version specific)
+      path.join(npmRootPath, 'node_modules', packageName, relativePath),
+      // Additional path pattern sometimes used in CI environments
+      path.join(npmRootPath, 'is-odd', relativePath)
+    ];
+    
+    for (const potentialPath of possiblePaths) {
+      if (fs.existsSync(potentialPath)) {
+        return potentialPath;
+      }
+    }
+    
+    // If we didn't find it in standard locations, output debug info
+    console.log(`Debug info for locating package ${packageName}:`);
+    console.log(`- NPM root: ${npmRootPath}`);
+    console.log(`- Searched paths:`);
+    possiblePaths.forEach(p => console.log(`  - ${p}`));
+    
+    try {
+      const lsOutput = execSync(`ls -la ${npmRootPath}`).toString();
+      console.log(`- Content of npm root:\n${lsOutput}`);
+      
+      // Try find command to locate package
+      try {
+        const findOutput = execSync(`find ${npmRootPath} -name ${packageName} -type d`).toString();
+        console.log(`- Find results:\n${findOutput}`);
+        
+        if (findOutput.trim()) {
+          // If find returned something, use the first result
+          const foundPath = findOutput.trim().split('\n')[0];
+          return path.join(foundPath, relativePath);
+        }
+      } catch (findErr) {
+        console.log(`- Error running find: ${findErr.message}`);
+      }
+    } catch (lsErr) {
+      console.log(`- Error listing npm root: ${lsErr.message}`);
+    }
+    
+    // Fall back to the first path if nothing else worked
+    return possiblePaths[0];
   } catch (error) {
     throw new Error(`Failed to locate global package ${packageName}: ${error.message}`);
   }
