@@ -103,6 +103,13 @@ The publishing process is FULLY AUTOMATED via GitHub Actions workflow:
 
 ### Automated Publishing (Recommended)
 
+⚠️ **IMPORTANT**: Due to branch protection, you must create a feature branch BEFORE running the publish scripts!
+
+```bash
+# First create a feature branch for version update
+git checkout -b feature/version-update-x.y.z
+```
+
 #### Interactive Mode
 
 To publish a new version using the interactive script:
@@ -112,17 +119,23 @@ npm run publish:version
 ```
 
 This script will:
-1. Check if you're on the main branch
+1. Check if you're on the main branch (will fail due to branch protection)
 2. Verify there are no uncommitted changes
 3. Show current versions and prompt for the type of version bump (major, minor, patch, or custom)
 4. Update versions in both package.json AND src/cli.js
-5. Commit and push changes to GitHub
-6. Create and push a tag matching the version
-7. GitHub Actions will then automatically run tests and publish the package
+5. Attempt to commit and push changes to GitHub (will fail on protected branches)
+
+If the script fails due to branch protection rules, you'll need to manually:
+1. Add the changed files: `git add package.json src/cli.js`
+2. Commit the changes: `git commit -m "Update version to x.y.z"`
+3. Push the branch: `git push -u origin feature/version-update-x.y.z`
+4. Create a tag: `git tag vx.y.z`
+5. Push the tag: `git push origin vx.y.z`
+6. Create a PR and merge it to main
 
 #### Non-Interactive Mode (for CI/CD)
 
-For automated environments, use one of these non-interactive commands:
+For automated environments, use one of these non-interactive commands on a feature branch:
 
 ```bash
 # Bump patch version (0.0.x)
