@@ -14,7 +14,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 program
   .name('patcher')
   .description('Patch installed npm packages')
-  .version('1.1.3')
+  .version('1.1.4')
   .argument('<package-or-config>', 'Package name or path to configuration file')
   .option('-u, --undo', 'Undo previous patches')
   .option('-c, --create', 'Create a default configuration file for the package in ~/.patcher')
