@@ -6,21 +6,60 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Branch and PR Strategy
 
-1. **ALWAYS** follow this workflow for new features, bugfixes, or improvements:
+1. **🔴 CRITICAL: NEVER commit directly to main branch 🔴**
+   - All changes MUST go through pull requests
+   - This includes code, documentation, and configuration changes
+   - NO EXCEPTIONS for quick fixes or "minor" changes
+   - CI/CD workflows depend on proper branch management
+
+2. **ALWAYS** follow this workflow for new features, bugfixes, or improvements:
    - Create a feature branch from main: `git checkout -b feature/my-feature`
    - Make changes on that branch
    - Push the branch: `git push -u origin feature/my-feature`
    - Create a PR with a clear, concise description of the changes
    - Merge the PR to main after review
 
-2. **NEVER** commit directly to main, except for:
-   - Version updates for publishing (done by the publish script)
-   - Documentation updates that don't affect functionality
-   
-3. **PR Descriptions** should be clear and concise, explaining:
+3. **Branch naming convention**:
+   - `feature/` - For new features (e.g., `feature/add-config-validation`)
+   - `fix/` - For bug fixes (e.g., `fix/package-name-sanitization`)
+   - `docs/` - For documentation updates (e.g., `docs/improve-readme`)
+   - `refactor/` - For code refactoring (e.g., `refactor/cli-structure`)
+
+4. **PR Descriptions** should be clear and concise, explaining:
    - What was changed
    - Why it was changed
    - Any special considerations or implications for users
+
+### Branch Protection Configuration
+
+For repository administrators, the following branch protection rules should be configured on GitHub:
+
+1. Go to Repository Settings → Branches → Branch protection rules → Add rule
+2. Configure the following settings for the `main` branch:
+   - ✅ Require pull request reviews before merging
+   - ✅ Require status checks to pass before merging
+   - ✅ Require branches to be up to date before merging
+   - ✅ Do not allow bypassing the above settings
+   - ✅ Restrict who can push to matching branches
+
+Local git configuration to help prevent accidental commits to main:
+```bash
+# Add this to your .git/hooks/pre-commit file (create if it doesn't exist)
+#!/bin/sh
+BRANCH=$(git symbolic-ref HEAD 2>/dev/null | cut -d"/" -f 3-)
+if [ "$BRANCH" = "main" ]; then
+  echo "❌ ERROR: You're attempting to commit directly to the main branch"
+  echo "Please create a feature branch instead:"
+  echo "  git checkout -b feature/your-feature-name"
+  exit 1
+fi
+exit 0
+```
+
+Make sure to make the hook executable:
+```bash
+chmod +x .git/hooks/pre-commit
+```
 
 4. **Use GitHub CLI** for PR management when possible:
    ```bash
