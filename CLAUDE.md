@@ -23,7 +23,26 @@ The publishing process is FULLY AUTOMATED via GitHub Actions workflow:
 - Authentication and publishing happen in the CI environment
 - Local credentials should NEVER be used
 
-To publish a new version:
+### Automated Publishing (Recommended)
+
+To publish a new version using the automated script:
+
+```bash
+npm run publish:version
+```
+
+This script will:
+1. Check if you're on the main branch
+2. Verify there are no uncommitted changes
+3. Show current versions and prompt for the type of version bump (major, minor, patch, or custom)
+4. Update versions in both package.json AND src/cli.js
+5. Commit and push changes to GitHub
+6. Create and push a tag matching the version
+7. GitHub Actions will then automatically run tests and publish the package
+
+### Manual Publishing (Not Recommended)
+
+If you need to manually publish (avoid this if possible):
 1. Update the version in both package.json AND src/cli.js
 2. Commit and push changes to GitHub
 3. Create a new tag: `git tag v0.3.x && git push origin v0.3.x`
