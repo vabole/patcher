@@ -18,7 +18,8 @@ program
   .option('-y, --yes', 'Skip confirmation prompt', false)
   .option('-b, --branch <branch>', 'Allow publishing from specified branch instead of main')
   .option('--dry-run', 'Show what would be done without making changes', false)
-  .option('--no-git', 'Skip git operations (commit, tagging, and pushing)', false)
+  .option('--git', 'Perform git operations (commit, tagging, and pushing)', true)
+  .option('--no-git', 'Skip git operations (commit, tagging, and pushing)')
   .addHelpText('after', `
 Examples:
   # Interactive mode (recommended for manual use)
@@ -349,7 +350,6 @@ async function main() {
     }
     
     // Create and push tag (if git operations are not disabled)
-    console.log('DEBUG - options:', JSON.stringify(options, null, 2));
     if (options.git) {
       createAndPushTag(newVersion, options);
     } else if (options.dryRun) {
