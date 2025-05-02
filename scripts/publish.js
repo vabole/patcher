@@ -349,6 +349,7 @@ async function main() {
     }
     
     // Create and push tag (if git operations are not disabled)
+    console.log('DEBUG - options:', JSON.stringify(options, null, 2));
     if (options.git) {
       createAndPushTag(newVersion, options);
     } else if (options.dryRun) {
