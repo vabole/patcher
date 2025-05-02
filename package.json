@@ -1,6 +1,6 @@
 {
   "name": "@vabole/patcher",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "publishConfig": {
     "access": "public"
   },
@@ -12,11 +12,12 @@
   },
   "scripts": {
     "patcher": "node src/cli.js",
-    "test": "node src/cli.js test-config.js && node local-test-runner.js && node src/cli.js --undo test-config.js",
-    "test:patch": "node src/cli.js local-config.js",
-    "test:undo": "node src/cli.js --undo local-config.js",
+    "test": "node src/cli.js is-odd --file ./test-config.js && node local-test-runner.js && node src/cli.js is-odd --undo --file ./test-config.js",
+    "test:patch": "node src/cli.js is-odd --file ./local-config.js",
+    "test:undo": "node src/cli.js is-odd --undo --file ./local-config.js",
     "test:home-config": "node test/run-home-config-test.js",
     "test:special-package": "node test/special-package-test.js",
+    "test:cli-streamlined": "node test/run-cli-streamlined-test.js",
     "publish:version": "node scripts/publish.js",
     "publish:patch": "node scripts/publish.js --type patch --yes",
     "publish:minor": "node scripts/publish.js --type minor --yes",
@@ -48,7 +49,8 @@
     "@patcher-test/is-even": "file:test/fixtures/packages/is-even",
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
-    "js-beautify": "^1.14.9"
+    "js-beautify": "^1.14.9",
+    "validator": "^13.15.0"
   },
   "devDependencies": {
     "is-odd": "^3.0.1"
