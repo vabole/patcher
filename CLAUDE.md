@@ -4,10 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 - Install: `npm install`
-- Run: `node src/cli.js <config-file>` or `npm run patcher <config-file>`
+- Run with config file: `node src/cli.js <config-file>` or `npm run patcher <config-file>`
+- Run with package name: `node src/cli.js <package-name>` (uses config from ~/.patcher)
+- Create config: `node src/cli.js --create <package-name>` (creates in ~/.patcher)
 - Test: `npm test`
 - Patch test: `npm run test:patch`
 - Undo patch test: `npm run test:undo`
+- Home config test: `npm run test:home-config`
+- Run single test: `node local-test-runner.js`
 
 ## Publishing
 ⚠️ **EXTREMELY IMPORTANT**: NEVER attempt to publish with `npm publish` directly. ALWAYS use GitHub CI for publishing.
@@ -19,7 +23,26 @@ The publishing process is FULLY AUTOMATED via GitHub Actions workflow:
 - Authentication and publishing happen in the CI environment
 - Local credentials should NEVER be used
 
-To publish a new version:
+### Automated Publishing (Recommended)
+
+To publish a new version using the automated script:
+
+```bash
+npm run publish:version
+```
+
+This script will:
+1. Check if you're on the main branch
+2. Verify there are no uncommitted changes
+3. Show current versions and prompt for the type of version bump (major, minor, patch, or custom)
+4. Update versions in both package.json AND src/cli.js
+5. Commit and push changes to GitHub
+6. Create and push a tag matching the version
+7. GitHub Actions will then automatically run tests and publish the package
+
+### Manual Publishing (Not Recommended)
+
+If you need to manually publish (avoid this if possible):
 1. Update the version in both package.json AND src/cli.js
 2. Commit and push changes to GitHub
 3. Create a new tag: `git tag v0.3.x && git push origin v0.3.x`
@@ -35,28 +58,34 @@ These actions will ALWAYS fail and potentially expose credentials.
 
 ## Code Style Guidelines
 - **Formatting**: Use 2-space indentation for JavaScript
-- **Imports**: Use ES Modules (`import`/`export`) pattern
+- **Imports**: Use ES Modules (`import`/`export`) pattern with Node.js native modules prefixed with 'node:'
 - **Error handling**: Use try/catch with descriptive error messages
-- **Documentation**: Use JSDoc for function documentation
+- **Documentation**: Use JSDoc for function documentation with all parameters described
 - **Naming**: Use camelCase for variables/functions
 - **Structure**: Keep modules focused on single responsibilities
 - **String replacement**: Use direct string replacement (`string.replace`)
 - **Input validation**: Validate inputs at function start
-- **Configuration**: Supports both JSON and JavaScript module configuration formats
+- **Configuration**: Uses JavaScript module format (.js) for configuration files
+- **Consistency**: Follow existing patterns in the codebase
 
 ## Project Structure
 - **src/index.js**: Core patching functionality
 - **src/cli.js**: Command-line interface
-- **local-config.json**: Example JSON config for patching local packages
+- **src/home-config.js**: Home directory configuration management
+- **local-config.js**: Example JS config for patching local packages
 - **example-config.js**: Example JavaScript module config with template literals
 - **local-test-runner.js**: Script to test the patching results
+- **test.js**: Simple test script for verifying patching functionality
+- **test/home-config.test.js**: Test for home directory configuration feature
 
 ## Testing
-- `npm test`: Test without patches
+- `npm test`: Run full test suite (patch, verify, undo)
 - `npm run test:patch`: Apply patches to local is-odd package
 - `npm run test:undo`: Revert patches
+- `node local-test-runner.js`: Test if patching was successful
 
 When testing, ensure you:
 1. Use same runtime (npm/node) for patching and testing
 2. Clear Node.js module cache when testing modifications 
 3. Run tests in expected order (test → patch → test → undo → test)
+4. Verify that patches can be applied and undone correctly

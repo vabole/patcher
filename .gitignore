@@ -42,3 +42,5 @@ ThumbsJP.db
 
 # SpecStory files
 .specstory/
+
+**/.claude/settings.local.json

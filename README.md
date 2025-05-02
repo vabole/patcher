@@ -19,13 +19,21 @@ npm install
 
 ## Usage
 
-Create a configuration file (e.g., `patch-config.json` or `patch-config.js`):
+There are two ways to use patcher:
 
-```json
-{
-  "packagePath": "/path/to/node_modules/package-to-patch/dist/index.js",
-  "beautify": true,
-  "replacements": [
+1. **Configuration File Approach**: Create and specify a configuration file
+2. **Package Name Approach**: Use package names directly with configurations stored in `~/.patcher/`
+
+### Option 1: Using Configuration Files
+
+Create a JavaScript configuration file (e.g., `patch-config.js`):
+
+```js
+// patch-config.js
+export default {
+  packagePath: "/path/to/node_modules/package-to-patch/dist/index.js",
+  beautify: true,
+  replacements: [
     ["original string 1", "replacement string 1"],
     ["original string 2", "replacement string 2"]
   ]
@@ -34,40 +42,65 @@ Create a configuration file (e.g., `patch-config.json` or `patch-config.js`):
 
 Or use a global npm package name:
 
-```json
-{
-  "globalNpmPackage": "package-name",
-  "relativePath": "index.js",
-  "beautify": true,
-  "replacements": [
+```js
+// patch-config.js
+export default {
+  globalNpmPackage: "package-name",
+  relativePath: "index.js",
+  beautify: true,
+  replacements: [
     ["original string 1", "replacement string 1"],
     ["original string 2", "replacement string 2"]
   ]
 }
 ```
 
-### Apply Patches
+#### Apply Patches with Config File
 
 ```
-npx @vabole/patcher patch-config.json
-```
-
-Or if installed globally:
-
-```
-patcher patch-config.json
-```
-
-### Undo Patches
-
-```
-npx @vabole/patcher --undo patch-config.json
+npx @vabole/patcher patch-config.js
 ```
 
 Or if installed globally:
 
 ```
-patcher --undo patch-config.json
+patcher patch-config.js
+```
+
+#### Undo Patches with Config File
+
+```
+npx @vabole/patcher --undo patch-config.js
+```
+
+Or if installed globally:
+
+```
+patcher --undo patch-config.js
+```
+
+### Option 2: Using Package Names Directly
+
+You can store package configurations in your home directory at `~/.patcher/` and use package names directly.
+
+#### Create a Configuration File
+
+```
+patcher --create is-odd
+```
+
+This creates a default configuration file at `~/.patcher/is-odd.js` that you can edit to add your replacements.
+
+#### Apply Patches with Package Name
+
+```
+patcher is-odd
+```
+
+#### Undo Patches with Package Name
+
+```
+patcher --undo is-odd
 ```
 
 ## Configuration Options
@@ -81,34 +114,42 @@ patcher --undo patch-config.json
 | `beautify` | boolean | (Optional) Whether to beautify the code before patching (default: true) |
 | `replacements` | array | Array of [original, replacement] string pairs |
 
-## Configuration Formats
+## Home Directory Configuration
 
-You can use either JSON or JavaScript module format for your configuration.
+When using package names directly, patcher looks for configuration files in the `~/.patcher/` directory:
 
-### JSON Format
+- `~/.patcher/<package-name>.js` - JavaScript module configuration file
 
-```json
-{
-  "globalNpmPackage": "is-odd",
-  "replacements": [
-    ["original string", "replacement string"]
-  ]
-}
+### Creating Default Configuration
+
+You can create a default configuration file with:
+
+```
+patcher --create <package-name>
 ```
 
-### JavaScript Module Format
+This generates a JavaScript configuration file that you can edit to add your specific replacements.
+
+## Configuration Format
+
+Configuration files must use JavaScript module format (`.js` files):
 
 ```js
-// patch-config.js
+// package-name.js
 export default {
-  globalNpmPackage: "is-odd",
+  globalNpmPackage: "package-name",
+  // or packagePath: "/path/to/file.js",
+  beautify: true,  // optional, defaults to true
+  relativePath: "path/within/package", // optional, defaults to "index.js"
+  targetFile: "specific/file.js", // optional, overrides default path resolution
   replacements: [
     [
       "original string", 
       `replacement string
       with multiple lines
       without escaping`
-    ]
+    ],
+    ["another string to replace", "replacement"]
   ]
 }
 ```
@@ -119,11 +160,16 @@ export default {
 
 Patching the `is-odd` package to throw an error when zero is provided:
 
-```json
-{
-  "globalNpmPackage": "is-odd",
-  "replacements": [
-    ["module.exports = function isOdd(value) {", "module.exports = function isOdd(value) {\n  if (value === 0) throw new Error('zero is not allowed');"]
+```js
+// is-odd.js
+export default {
+  globalNpmPackage: "is-odd",
+  replacements: [
+    [
+      "module.exports = function isOdd(value) {", 
+      `module.exports = function isOdd(value) {
+  if (value === 0) throw new Error('zero is not allowed');`
+    ]
   ]
 }
 ```
@@ -132,12 +178,17 @@ Patching the `is-odd` package to throw an error when zero is provided:
 
 When the package's entry point is not the file you want to patch, or when you want to patch a different file:
 
-```json
-{
-  "globalNpmPackage": "@anthropic-ai/claude-code",
-  "targetFile": "lib/main.js",
-  "replacements": [
-    ["function processInput(", "function processInput(\n  // Add custom validation\n"]
+```js
+// claude-code.js
+export default {
+  globalNpmPackage: "@anthropic-ai/claude-code",
+  targetFile: "lib/main.js",
+  replacements: [
+    [
+      "function processInput(", 
+      `function processInput(
+  // Add custom validation`
+    ]
   ]
 }
 ```
