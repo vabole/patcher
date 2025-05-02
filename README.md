@@ -33,6 +33,35 @@ cd patcher
 npm install
 ```
 
+### Developer Setup
+
+When you install the package locally with `npm install`, git hooks will be automatically set up to protect the main branch from direct commits. If you need to set them up manually:
+
+```
+npm run setup-git-hooks
+```
+
+This configures a pre-commit hook that prevents accidental direct commits to the main branch, enforcing the proper workflow through pull requests.
+
+#### Development Workflow
+
+1. Create a feature branch for your changes:
+   ```
+   git checkout -b feature/my-feature
+   ```
+
+2. Make your changes and commit them to your branch:
+   ```
+   git add .
+   git commit -m "Description of your changes"
+   ```
+
+3. Push your branch and create a PR:
+   ```
+   git push -u origin feature/my-feature
+   gh pr create
+   ```
+
 ## Usage
 
 Patcher uses package names directly with configurations stored in `~/.patcher/`. You can also use specific configuration files with the `--file` option.
