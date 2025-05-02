@@ -18,11 +18,4 @@ jobs:
         node-version: 22
         cache: 'npm'
     - run: npm ci
-    - name: Install is-odd globally and find its path
-      run: |
-        npm install -g is-odd
-        which node
-        npm root -g
-        ls -la $(npm root -g)
-        find $(npm root -g) -name is-odd -type d
     - run: npm test
