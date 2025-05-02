@@ -135,6 +135,8 @@ function createAndPushTag(version, options) {
     if (isMainBranch && !isBranchSpecified) {
       console.log(`Creating feature branch ${allowedBranch} for version update...`);
       execSync(`git checkout -b ${allowedBranch}`, { stdio: 'inherit' });
+      // Update currentBranch to the newly created branch
+      currentBranch = allowedBranch;
     } else if (currentBranch !== allowedBranch && !isVersionBranch) {
       throw new Error(`You are on branch '${currentBranch}'. 
 To publish, either:
@@ -156,8 +158,10 @@ To publish, either:
     
     // Push the feature branch
     console.log(`Pushing branch ${currentBranch}...`);
+    let branchPushed = false;
     try {
       execSync(`git push -u origin ${currentBranch}`, { stdio: 'inherit' });
+      branchPushed = true;
     } catch (pushError) {
       console.warn(`Warning: Could not push branch. You may need to push manually.`);
       console.warn(`Run: git push -u origin ${currentBranch}`);
@@ -166,32 +170,49 @@ To publish, either:
     // Create and push tag
     console.log(`Creating tag v${version}...`);
     execSync(`git tag v${version}`, { stdio: 'inherit' });
+    let tagPushed = false;
     try {
       execSync(`git push origin v${version}`, { stdio: 'inherit' });
+      tagPushed = true;
     } catch (tagPushError) {
       console.warn(`Warning: Could not push tag. You may need to push manually.`);
       console.warn(`Run: git push origin v${version}`);
     }
     
-    // Create PR automatically
-    console.log(`\nCreating PR for version ${version}...`);
-    try {
-      const prTitle = `Update version to ${version}`;
-      const prBody = `## Version ${version}
+    // Create PR automatically - only if branch was pushed successfully
+    if (branchPushed) {
+      // Small delay to ensure GitHub registers the push
+      console.log(`\nWaiting for GitHub to register the branch...`);
+      try {
+        execSync('sleep 2');
+      } catch (e) {
+        // Ignore interruption
+      }
+      
+      console.log(`Creating PR for version ${version}...`);
+      try {
+        const prTitle = `Update version to ${version}`;
+        const prBody = `## Version ${version}
 
 This PR updates the package version to ${version}.
 
 The version tag has already been created and pushed, which will trigger publishing once this PR is merged.`;
-      
-      execSync(`gh pr create --title "${prTitle}" --body "${prBody}"`, { stdio: 'inherit' });
-      console.log('\n✅ PR created successfully!');
-      console.log('\nNext steps:');
-      console.log('1. Wait for CI checks to pass on the PR');
-      console.log('2. Merge the PR to main');
-      console.log('3. The package will be automatically published by GitHub Actions');
-    } catch (prError) {
-      console.warn('\nCould not automatically create PR. Please create it manually:');
-      console.warn(`gh pr create --title "Update version to ${version}" --body "Version update to ${version}"`);
+        
+        // Explicitly specify the head branch to avoid confusion
+        execSync(`gh pr create --title "${prTitle}" --body "${prBody}" --head ${currentBranch}`, { stdio: 'inherit' });
+        console.log('\n✅ PR created successfully!');
+        console.log('\nNext steps:');
+        console.log('1. Wait for CI checks to pass on the PR');
+        console.log('2. Merge the PR to main');
+        console.log('3. The package will be automatically published by GitHub Actions');
+      } catch (prError) {
+        console.warn('\nCould not automatically create PR. Please create it manually:');
+        console.warn(`gh pr create --title "Update version to ${version}" --body "Version update to ${version}" --head ${currentBranch}`);
+      }
+    } else {
+      console.warn('\nSkipping PR creation because branch push failed.');
+      console.warn('After pushing the branch manually, create a PR:');
+      console.warn(`gh pr create --title "Update version to ${version}" --body "Version update to ${version}" --head ${currentBranch}`);
     }
   } catch (error) {
     console.error('Error in Git operations:', error.message);
