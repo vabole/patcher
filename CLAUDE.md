@@ -22,6 +22,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    - Why it was changed
    - Any special considerations or implications for users
 
+4. **Use GitHub CLI** for PR management when possible:
+   ```bash
+   # Create a PR
+   gh pr create --title "Your PR title" --body "Description of changes"
+   
+   # View a PR
+   gh pr view 123
+   
+   # Merge a PR
+   gh pr merge 123 --merge
+   
+   # Check PR status
+   gh pr status
+   ```
+
 This workflow creates a cleaner history and makes it easier to understand changes.
 
 ## Commands
