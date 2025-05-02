@@ -101,85 +101,78 @@ The publishing process is FULLY AUTOMATED via GitHub Actions workflow:
 - Authentication and publishing happen in the CI environment
 - Local credentials should NEVER be used
 
-### Automated Publishing (Recommended)
+### Publishing Process (One-Command Approach)
 
-⚠️ **IMPORTANT**: Due to branch protection, you must create a feature branch BEFORE running the publish scripts!
+The publishing process is designed to work with branch protection and consists of three steps:
+1. Run a publish command to create a feature branch, update version numbers, and create a tag
+2. Create a PR to merge changes to main
+3. GitHub Actions automatically publishes the package when it detects the tag
+
+#### Single-Command Publishing (Recommended)
+
+To publish a new version in one command, simply run one of these from the main branch:
 
 ```bash
-# First create a feature branch for version update
-git checkout -b feature/version-update-x.y.z
+# Interactive mode - will prompt for version type
+npm run publish:version
+
+# Patch version bump (1.2.3 -> 1.2.4)
+npm run publish:patch
+
+# Minor version bump (1.2.0 -> 1.3.0)
+npm run publish:minor
+
+# Major version bump (1.0.0 -> 2.0.0)
+npm run publish:major
 ```
 
-#### Interactive Mode
+The script will:
+1. Automatically create a feature branch (e.g., feature/version-update-2.1.0)
+2. Update versions in both package.json AND src/cli.js
+3. Commit and push changes to GitHub
+4. Create and push a version tag
+5. Provide instructions for creating a PR
 
-To publish a new version using the interactive script:
+After running the script, follow the instructions to:
+1. Create a PR using GitHub CLI: `gh pr create`
+2. Merge the PR to main when approved
 
-```bash
-# Use --branch flag to allow running on a feature branch
-npm run publish:version -- --branch feature/version-update-x.y.z
-```
+The package will be published automatically by GitHub Actions when it detects the tag.
 
-This script will:
-1. Check if you're on the specified branch (default: main)
-2. Verify there are no uncommitted changes
-3. Show current versions and prompt for the type of version bump (major, minor, patch, or custom)
-4. Update versions in both package.json AND src/cli.js
-5. Attempt to commit and push changes to GitHub (will fail if branch is protected)
+#### Advanced Usage Options
 
-If you don't use the --branch flag or if the script fails due to branch protection, you'll need to manually:
-1. Add the changed files: `git add package.json src/cli.js`
-2. Commit the changes: `git commit -m "Update version to x.y.z"`
-3. Push the branch: `git push -u origin feature/version-update-x.y.z`
-4. Create a tag: `git tag vx.y.z`
-5. Push the tag: `git push origin vx.y.z`
-6. Create a PR and merge it to main
-7. GitHub Actions will publish the package when the tag is pushed
-
-#### Non-Interactive Mode (for CI/CD)
-
-For automated environments, use one of these non-interactive commands on a feature branch:
+If you're not on the main branch or want more control:
 
 ```bash
-# Bump patch version (0.0.x)
-npm run publish:patch -- --branch feature/version-update-x.y.z
+# Specify a custom branch name
+npm run publish:minor -- --branch feature/my-version-branch
 
-# Bump minor version (0.x.0)
-npm run publish:minor -- --branch feature/version-update-x.y.z
-
-# Bump major version (x.0.0)
-npm run publish:major -- --branch feature/version-update-x.y.z
+# Specify an exact version instead of auto-incrementing
+npm run publish:version -- --version 3.2.1 --yes
 
 # Test what would happen without making changes
 npm run publish:dry-run
 ```
 
-You can also use the publish script directly with more options:
+#### Publishing Triggers
 
-```bash
-# Specify a custom version
-node scripts/publish.js --version 1.2.3 --yes --branch feature/version-update-1.2.3
+Publishing is triggered when ANY of these conditions are met:
+1. A tag is pushed that starts with "v" (e.g., v2.1.0)
+2. A GitHub release is created
+3. A commit is pushed to main with "version" in the commit message
 
-# Allow publishing from a specific branch (REQUIRED with branch protection)
-node scripts/publish.js --type minor --branch feature/my-branch --yes
+### Manual Publishing Process (Alternative)
 
-# Skip git operations
-node scripts/publish.js --type patch --no-git --yes
-```
-
-**IMPORTANT**: With main branch protection enabled:
-1. Always use the `--branch` option to specify your feature branch name
-2. When the script succeeds, create a PR to merge changes to main
-3. GitHub Actions will publish when the tag is detected
-
-### Manual Publishing (Not Recommended)
-
-If you need to manually publish (avoid this if possible):
+If you need to perform the version update steps manually:
 1. Create a feature branch: `git checkout -b feature/version-update-x.y.z`
 2. Update the version in both package.json AND src/cli.js
-3. Commit and push changes to GitHub
-4. Create a new tag: `git tag vx.y.z && git push origin vx.y.z`
-5. Create a PR and merge the changes to main
-6. GitHub CI will automatically publish the package to npm when it detects the tag
+3. Commit changes: `git add package.json src/cli.js && git commit -m "Update version to x.y.z"`
+4. Push branch: `git push -u origin feature/version-update-x.y.z` 
+5. Create a tag: `git tag vx.y.z && git push origin vx.y.z`
+6. Create a PR and merge the changes to main
+7. GitHub Actions will automatically publish when it detects the tag
+
+The key is pushing the tag (step 5), as this is what triggers the publishing workflow.
 
 ❌ STRICTLY FORBIDDEN:
 - NEVER run `npm publish` locally

@@ -125,17 +125,27 @@ function updateCliJs(newVersion) {
 function createAndPushTag(version, options) {
   try {
     // Check if we're on allowed branch
-    const allowedBranch = options.branch || 'main';
+    const allowedBranch = options.branch || `feature/version-update-${version}`;
+    const isBranchSpecified = !!options.branch;
     const currentBranch = execSync('git branch --show-current', { encoding: 'utf8' }).trim();
+    const isMainBranch = currentBranch === 'main';
+    const isVersionBranch = currentBranch.startsWith('feature/version-update');
     
-    if (currentBranch !== allowedBranch) {
-      throw new Error(`You are on branch '${currentBranch}'. You need to be on '${allowedBranch}' branch to publish.`);
+    // If we're on main and no branch is specified, auto-create a feature branch
+    if (isMainBranch && !isBranchSpecified) {
+      console.log(`Creating feature branch ${allowedBranch} for version update...`);
+      execSync(`git checkout -b ${allowedBranch}`, { stdio: 'inherit' });
+    } else if (currentBranch !== allowedBranch && !isVersionBranch) {
+      throw new Error(`You are on branch '${currentBranch}'. 
+To publish, either:
+1. Create a feature branch first: git checkout -b feature/version-update-${version}
+2. Specify your branch with --branch: npm run publish:minor -- --branch ${currentBranch}`);
     }
     
     if (options.dryRun) {
       console.log(`[DRY RUN] Would commit changes to package.json and src/cli.js`);
-      console.log(`[DRY RUN] Would push changes to ${allowedBranch}`);
       console.log(`[DRY RUN] Would create and push tag v${version}`);
+      console.log(`[DRY RUN] Would create PR from ${allowedBranch} to main`);
       return;
     }
     
@@ -144,17 +154,30 @@ function createAndPushTag(version, options) {
     execSync('git add package.json src/cli.js', { stdio: 'inherit' });
     execSync(`git commit -m "Update version to ${version}"`, { stdio: 'inherit' });
     
-    // Push changes to branch
-    console.log(`Pushing changes to ${allowedBranch}...`);
-    execSync(`git push origin ${allowedBranch}`, { stdio: 'inherit' });
+    // Push the feature branch
+    console.log(`Pushing branch ${currentBranch}...`);
+    try {
+      execSync(`git push -u origin ${currentBranch}`, { stdio: 'inherit' });
+    } catch (pushError) {
+      console.warn(`Warning: Could not push branch. You may need to push manually.`);
+      console.warn(`Run: git push -u origin ${currentBranch}`);
+    }
     
     // Create and push tag
     console.log(`Creating tag v${version}...`);
     execSync(`git tag v${version}`, { stdio: 'inherit' });
-    execSync(`git push origin v${version}`, { stdio: 'inherit' });
+    try {
+      execSync(`git push origin v${version}`, { stdio: 'inherit' });
+    } catch (tagPushError) {
+      console.warn(`Warning: Could not push tag. You may need to push manually.`);
+      console.warn(`Run: git push origin v${version}`);
+    }
     
-    console.log(`✓ Successfully created and pushed tag v${version}`);
-    console.log('GitHub Actions will now run tests and publish the package to npm.');
+    console.log(`\n✅ Version update steps completed!`);
+    console.log(`\nTo complete publishing:`);
+    console.log(`1. Create a PR: gh pr create --title "Update version to ${version}" --body "Version update to ${version}"`);
+    console.log(`2. Merge the PR to main when approved`);
+    console.log(`3. The package will be published by GitHub Actions based on the v${version} tag`);
   } catch (error) {
     console.error('Error in Git operations:', error.message);
     process.exit(1);
