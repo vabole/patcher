@@ -1,0 +1,17 @@
+{
+  "name": "@patcher-test/is-even",
+  "version": "1.0.0",
+  "description": "A very simple package that checks if a number is even",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": [
+    "test",
+    "is-even",
+    "patcher"
+  ],
+  "author": "vabole",
+  "license": "MIT"
+}

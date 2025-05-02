@@ -7,8 +7,25 @@ import os from 'node:os';
  * @returns {string} Path to the configuration directory
  */
 export function getConfigDir() {
-  const homeDir = os.homedir();
+  // Allow overriding the home directory for testing
+  const homeDir = process.env.PATCHER_TEST_HOME || os.homedir();
   return path.join(homeDir, '.patcher');
+}
+
+/**
+ * Sanitizes a package name to create a valid filename
+ * Converts special characters like @ and / to _ and -
+ * @param {string} packageName The package name to sanitize
+ * @returns {string} A sanitized filename-safe version of the package name
+ */
+export function sanitizePackageName(packageName) {
+  // Replace @ with _at_
+  // Replace / with --
+  // Replace any other invalid characters with _
+  return packageName
+    .replace(/@/g, '_at_')
+    .replace(/\//g, '--')
+    .replace(/[^a-zA-Z0-9_\-]/g, '_');
 }
 
 /**
@@ -24,8 +41,11 @@ export function findPackageConfig(packageName) {
     return null;
   }
   
+  // Sanitize package name for filename
+  const safePackageName = sanitizePackageName(packageName);
+  
   // Only use JavaScript module format
-  const jsPath = path.join(configDir, `${packageName}.js`);
+  const jsPath = path.join(configDir, `${safePackageName}.js`);
   if (fs.existsSync(jsPath)) {
     return jsPath;
   }
@@ -73,7 +93,9 @@ export async function createDefaultConfig(packageName) {
     fs.mkdirSync(configDir, { recursive: true });
   }
   
-  const configPath = path.join(configDir, `${packageName}.js`);
+  // Sanitize package name for filename
+  const safePackageName = sanitizePackageName(packageName);
+  const configPath = path.join(configDir, `${safePackageName}.js`);
   
   // Create a default configuration file
   const defaultConfigContent = `// Configuration for ${packageName} package
