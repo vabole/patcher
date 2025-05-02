@@ -23,10 +23,29 @@ program
     try {
       let config;
       
+      // Directly handle --create before any other processing
+      // This fixes the issue with scoped packages
+      if (options.create) {
+        console.log(chalk.blue(`Looking for configuration for ${packageName} in ~/.patcher`));
+        // Create a default configuration file
+        const configPath = await homeConfig.createDefaultConfig(packageName);
+        console.log(chalk.green(`Created default configuration at ${configPath}`));
+        console.log(chalk.yellow('Please edit this file to add your replacements before applying patches.'));
+        return;
+      }
+      
       if (options.file) {
         // Configuration file path provided via --file flag
         const configPath = options.file;
         console.log(chalk.blue(`Using configuration file: ${configPath}`));
+        
+        // Special handling for scoped packages to detect if they're being mistakenly used as config files
+        if (configPath.startsWith('@') && configPath.includes('/') && !configPath.endsWith('.js')) {
+          console.error(chalk.red(`Error: The value '${configPath}' appears to be a scoped package name, not a configuration file.`));
+          console.log(chalk.blue(`If you meant to use a configuration file, ensure it has a .js extension.`));
+          console.log(chalk.blue(`If you meant to create a configuration for this package, use: patcher --create "${configPath}"`));
+          process.exit(1);
+        }
         
         // Only support .js config files
         if (!configPath.endsWith('.js')) {
@@ -39,14 +58,6 @@ program
       } else {
         // Package name provided - look for configuration in ~/.patcher
         console.log(chalk.blue(`Looking for configuration for ${packageName} in ~/.patcher`));
-        
-        if (options.create) {
-          // Create a default configuration file
-          const configPath = await homeConfig.createDefaultConfig(packageName);
-          console.log(chalk.green(`Created default configuration at ${configPath}`));
-          console.log(chalk.yellow('Please edit this file to add your replacements before applying patches.'));
-          return;
-        }
         
         config = await homeConfig.loadPackageConfig(packageName);
         
