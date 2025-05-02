@@ -5,6 +5,43 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 import readline from 'node:readline';
+import { Command } from 'commander';
+
+// Set up command-line interface
+const program = new Command();
+
+program
+  .name('publish-version')
+  .description('Automate version updates and publishing for patcher')
+  .option('-t, --type <type>', 'Version bump type (major, minor, patch)', 'patch')
+  .option('-v, --version <version>', 'Specific version to set (overrides type)')
+  .option('-y, --yes', 'Skip confirmation prompt', false)
+  .option('-b, --branch <branch>', 'Allow publishing from specified branch instead of main')
+  .option('--dry-run', 'Show what would be done without making changes', false)
+  .option('--no-git', 'Skip git operations (commit, tagging, and pushing)', false)
+  .addHelpText('after', `
+Examples:
+  # Interactive mode (recommended for manual use)
+  $ node scripts/publish.js
+  
+  # Non-interactive mode with automatic patch version bump
+  $ node scripts/publish.js --type patch --yes
+  
+  # Non-interactive mode with specific version
+  $ node scripts/publish.js --version 1.2.3 --yes
+  
+  # Test what would happen without making changes
+  $ node scripts/publish.js --dry-run
+  
+  # Allow publishing from a different branch
+  $ node scripts/publish.js --type minor --branch feature/my-branch --yes
+  
+  # Skip git operations
+  $ node scripts/publish.js --type patch --no-git --yes
+  `)
+  .parse(process.argv);
+
+const options = program.opts();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, '..');
@@ -13,7 +50,7 @@ const rootDir = path.join(__dirname, '..');
 const packageJsonPath = path.join(rootDir, 'package.json');
 const cliJsPath = path.join(rootDir, 'src', 'cli.js');
 
-// Create readline interface for user input
+// Create readline interface for user input (only used in interactive mode)
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
@@ -82,13 +119,23 @@ function updateCliJs(newVersion) {
 /**
  * Create and push a Git tag for the version
  * @param {string} version The version to tag
+ * @param {object} options Command line options
  */
-function createAndPushTag(version) {
+function createAndPushTag(version, options) {
   try {
-    // Check if we're on main branch
+    // Check if we're on allowed branch
+    const allowedBranch = options.branch || 'main';
     const currentBranch = execSync('git branch --show-current', { encoding: 'utf8' }).trim();
-    if (currentBranch !== 'main') {
-      throw new Error(`You are on branch '${currentBranch}'. You need to be on 'main' branch to publish.`);
+    
+    if (currentBranch !== allowedBranch) {
+      throw new Error(`You are on branch '${currentBranch}'. You need to be on '${allowedBranch}' branch to publish.`);
+    }
+    
+    if (options.dryRun) {
+      console.log(`[DRY RUN] Would commit changes to package.json and src/cli.js`);
+      console.log(`[DRY RUN] Would push changes to ${allowedBranch}`);
+      console.log(`[DRY RUN] Would create and push tag v${version}`);
+      return;
     }
     
     // Stage changes
@@ -96,9 +143,9 @@ function createAndPushTag(version) {
     execSync('git add package.json src/cli.js', { stdio: 'inherit' });
     execSync(`git commit -m "Update version to ${version}"`, { stdio: 'inherit' });
     
-    // Push changes to main
-    console.log('Pushing changes to main...');
-    execSync('git push origin main', { stdio: 'inherit' });
+    // Push changes to branch
+    console.log(`Pushing changes to ${allowedBranch}...`);
+    execSync(`git push origin ${allowedBranch}`, { stdio: 'inherit' });
     
     // Create and push tag
     console.log(`Creating tag v${version}...`);
@@ -149,17 +196,11 @@ function calculateNextVersion(currentVersion, bumpType) {
 }
 
 /**
- * Main function
+ * Run in interactive mode - prompts the user for input
  */
-async function main() {
+async function runInteractive() {
   try {
-    console.log('=== Patcher Publishing Tool ===');
-    
-    // Check for uncommitted changes
-    if (hasUncommittedChanges()) {
-      console.error('❌ Error: You have uncommitted changes. Please commit or stash them before publishing.');
-      process.exit(1);
-    }
+    console.log('=== Patcher Publishing Tool (Interactive Mode) ===');
     
     // Get current versions
     const pkgVersion = getPackageJson().version;
@@ -167,12 +208,6 @@ async function main() {
     
     console.log(`Current version in package.json: ${pkgVersion}`);
     console.log(`Current version in cli.js: ${cliVersion}`);
-    
-    // Ensure versions match
-    if (pkgVersion !== cliVersion) {
-      console.error(`❌ Error: Version mismatch between package.json (${pkgVersion}) and cli.js (${cliVersion})`);
-      process.exit(1);
-    }
     
     // Ask for version bump type
     console.log('\nWhat kind of version bump would you like to make?');
@@ -218,21 +253,119 @@ async function main() {
       process.exit(0);
     }
     
-    // Update versions
-    updatePackageJson(newVersion);
-    updateCliJs(newVersion);
+    return newVersion;
+  } finally {
+    rl.close();
+  }
+}
+
+/**
+ * Run in non-interactive mode - use command line options
+ * @param {object} options Command line options
+ * @param {string} currentVersion Current version
+ * @returns {string} New version
+ */
+function runNonInteractive(options, currentVersion) {
+  console.log('=== Patcher Publishing Tool (Non-Interactive Mode) ===');
+  
+  let newVersion;
+  
+  // If specific version is provided, use that
+  if (options.version) {
+    newVersion = options.version;
+    // Validate version format
+    if (!/^\d+\.\d+\.\d+$/.test(newVersion)) {
+      console.error('❌ Error: Invalid version format. Expected format: x.y.z (e.g., 1.2.3)');
+      process.exit(1);
+    }
+  } else {
+    // Otherwise calculate based on bump type
+    newVersion = calculateNextVersion(currentVersion, options.type);
+  }
+  
+  console.log(`Updating from ${currentVersion} to ${newVersion}`);
+  
+  // Skip confirmation if --yes is specified
+  if (!options.yes && !options.dryRun) {
+    console.log('⚠️  You are running in non-interactive mode, but without --yes flag.');
+    console.log('   Set --yes to skip this warning in CI environments.');
+    console.log('');
+    console.log('   Run with --dry-run to see what would happen without making changes.');
+    console.log('');
+    console.log('To proceed anyway, press Ctrl+C now to abort, or wait 5 seconds to continue...');
     
-    // Create and push tag
-    createAndPushTag(newVersion);
+    // Wait for 5 seconds to let the user abort if needed
+    try {
+      execSync('sleep 5');
+    } catch (err) {
+      console.log('Operation aborted.');
+      process.exit(1);
+    }
+  }
+  
+  return newVersion;
+}
+
+/**
+ * Main function
+ */
+async function main() {
+  try {
+    // Check for uncommitted changes
+    if (hasUncommittedChanges() && !options.dryRun) {
+      console.error('❌ Error: You have uncommitted changes. Please commit or stash them before publishing.');
+      console.error('   Use --dry-run to see what would happen without making changes.');
+      process.exit(1);
+    }
+    
+    // Get current versions
+    const pkgVersion = getPackageJson().version;
+    const cliVersion = getCliVersion();
+    
+    // Ensure versions match
+    if (pkgVersion !== cliVersion) {
+      console.error(`❌ Error: Version mismatch between package.json (${pkgVersion}) and cli.js (${cliVersion})`);
+      process.exit(1);
+    }
+    
+    let newVersion;
+    
+    // Determine if we're running in interactive or non-interactive mode
+    const isNonInteractive = options.type || options.version || options.yes;
+    
+    if (isNonInteractive) {
+      newVersion = runNonInteractive(options, pkgVersion);
+    } else {
+      newVersion = await runInteractive();
+    }
+    
+    if (options.dryRun) {
+      console.log(`[DRY RUN] Would update version in package.json to ${newVersion}`);
+      console.log(`[DRY RUN] Would update version in cli.js to ${newVersion}`);
+    } else {
+      // Update versions
+      updatePackageJson(newVersion);
+      updateCliJs(newVersion);
+    }
+    
+    // Create and push tag (if git operations are not disabled)
+    if (options.git) {
+      createAndPushTag(newVersion, options);
+    } else if (options.dryRun) {
+      console.log(`[DRY RUN] Git operations are disabled, would not create tag or push changes`);
+    } else {
+      console.log(`⚠️ Git operations are disabled with --no-git`);
+      console.log(`You will need to manually commit and tag this release.`);
+    }
     
     console.log('\n✅ Publishing process initiated successfully!');
-    console.log('The package will be published by GitHub Actions once the workflow completes.');
+    if (!options.dryRun && options.git) {
+      console.log('The package will be published by GitHub Actions once the workflow completes.');
+    }
     
   } catch (error) {
     console.error('❌ Error:', error.message);
     process.exit(1);
-  } finally {
-    rl.close();
   }
 }
 

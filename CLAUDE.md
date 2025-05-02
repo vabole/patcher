@@ -25,7 +25,9 @@ The publishing process is FULLY AUTOMATED via GitHub Actions workflow:
 
 ### Automated Publishing (Recommended)
 
-To publish a new version using the automated script:
+#### Interactive Mode
+
+To publish a new version using the interactive script:
 
 ```bash
 npm run publish:version
@@ -39,6 +41,37 @@ This script will:
 5. Commit and push changes to GitHub
 6. Create and push a tag matching the version
 7. GitHub Actions will then automatically run tests and publish the package
+
+#### Non-Interactive Mode (for CI/CD)
+
+For automated environments, use one of these non-interactive commands:
+
+```bash
+# Bump patch version (0.0.x)
+npm run publish:patch
+
+# Bump minor version (0.x.0)
+npm run publish:minor
+
+# Bump major version (x.0.0)
+npm run publish:major
+
+# Test what would happen without making changes
+npm run publish:dry-run
+```
+
+You can also use the publish script directly with more options:
+
+```bash
+# Specify a custom version
+node scripts/publish.js --version 1.2.3 --yes
+
+# Allow publishing from a different branch
+node scripts/publish.js --type minor --branch feature/my-branch --yes
+
+# Skip git operations
+node scripts/publish.js --type patch --no-git --yes
+```
 
 ### Manual Publishing (Not Recommended)
 
