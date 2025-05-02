@@ -163,11 +163,75 @@ export default {
 }
 ```
 
-## Examples
+## Real-World Use Cases
 
-### Basic Example
+Patcher shines when you need to make quick modifications to dependencies without forking them or waiting for upstream changes. Here are some common scenarios where Patcher is invaluable:
 
-Patching the `is-odd` package to throw an error when zero is provided:
+### Customizing Error Messages
+
+Improve error messages to be more user-friendly by patching the `validator` package:
+
+```js
+// validator-error-message.js
+export default {
+  globalNpmPackage: "validator",
+  targetFile: "lib/util/assertString.js",
+  replacements: [
+    [
+      `throw new TypeError("Expected a string but received a ".concat(invalidType));`,
+      `throw new TypeError("Validation failed: Please provide a valid text value instead of a ".concat(invalidType));`
+    ]
+  ]
+}
+```
+
+### Enhancing Security Requirements
+
+Strengthen password requirements in your application by patching validation defaults:
+
+```js
+// stronger-password-requirements.js
+export default {
+  globalNpmPackage: "validator",
+  targetFile: "lib/isStrongPassword.js",
+  replacements: [
+    [
+      `minLength: 8,
+  minLowercase: 1,
+  minUppercase: 1,
+  minNumbers: 1,
+  minSymbols: 1,`,
+      `minLength: 12,
+  minLowercase: 1,
+  minUppercase: 1,
+  minNumbers: 2,
+  minSymbols: 2,`
+    ]
+  ]
+}
+```
+
+### Enforcing Company Email Policies
+
+Restrict email validation to only allow specific company domains:
+
+```js
+// company-email-policy.js
+export default {
+  globalNpmPackage: "validator",
+  targetFile: "lib/isEmail.js", 
+  replacements: [
+    [
+      `host_whitelist: []`,
+      `host_whitelist: ['yourcompany.com', 'yourcompany.org']  // Only allow company domains`
+    ]
+  ]
+}
+```
+
+### Fixing Bugs in Dependencies
+
+Add missing functionality to packages while waiting for official fixes:
 
 ```js
 // is-odd.js
@@ -185,7 +249,7 @@ export default {
 
 ### Patching a Specific File
 
-When the package's entry point is not the file you want to patch, or when you want to patch a different file:
+When the package's entry point is not the file you want to patch:
 
 ```js
 // claude-code.js
