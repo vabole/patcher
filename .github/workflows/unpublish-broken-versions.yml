@@ -1,0 +1,45 @@
+name: Unpublish Broken Versions
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "yes" to confirm unpublishing broken versions'
+        required: true
+        default: 'no'
+
+jobs:
+  unpublish-broken-versions:
+    if: github.event.inputs.confirm == 'yes'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Unpublish broken version 2.1.0
+        run: npm unpublish @vabole/patcher@2.1.0
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Unpublish broken version 2.1.1
+        run: npm unpublish @vabole/patcher@2.1.1
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Unpublish broken version 2.1.2
+        run: npm unpublish @vabole/patcher@2.1.2
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          
+      - name: Verify unpublished versions
+        run: |
+          echo "Checking published versions..."
+          npm view @vabole/patcher versions
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
