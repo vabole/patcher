@@ -4,7 +4,7 @@
  */
 export default {
   // Package details
-  globalNpmPackage: "is-odd",
+  packagePath: "./node_modules/is-odd", // Use local package from devDependencies
   beautify: false,
   
   // Patches to apply
