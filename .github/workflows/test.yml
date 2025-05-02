@@ -26,6 +26,9 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
+    - name: Install is-odd globally
+      run: npm install -g is-odd
+    
     - name: Run standard tests
       run: npm test
     

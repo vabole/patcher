@@ -18,4 +18,6 @@ jobs:
         node-version: 22
         cache: 'npm'
     - run: npm ci
+    - name: Install is-odd globally
+      run: npm install -g is-odd
     - run: npm test

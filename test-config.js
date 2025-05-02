@@ -1,7 +1,13 @@
-// Configuration for testing
+/**
+ * Shared test configuration for patching is-odd package
+ * Used by all test scripts to ensure consistent behavior
+ */
 export default {
-  packagePath: "node_modules/is-odd/index.js",
+  // Package details
+  globalNpmPackage: "is-odd",
   beautify: false,
+  
+  // Patches to apply
   replacements: [
     [
       "module.exports = function isOdd(value) {", 

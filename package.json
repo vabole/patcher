@@ -13,8 +13,8 @@
   "scripts": {
     "patcher": "node src/cli.js",
     "test": "node src/cli.js is-odd --file ./test-config.js && node local-test-runner.js && node src/cli.js is-odd --undo --file ./test-config.js",
-    "test:patch": "node src/cli.js is-odd --file ./local-config.js",
-    "test:undo": "node src/cli.js is-odd --undo --file ./local-config.js",
+    "test:patch": "node src/cli.js is-odd --file ./test-config.js",
+    "test:undo": "node src/cli.js is-odd --undo --file ./test-config.js",
     "test:home-config": "node test/run-home-config-test.js",
     "test:special-package": "node test/special-package-test.js",
     "test:cli-streamlined": "node test/run-cli-streamlined-test.js",
@@ -54,7 +54,6 @@
   },
   "devDependencies": {
     "@patcher-test/is-even": "file:test/fixtures/packages/is-even",
-    "is-odd": "^3.0.1",
-    "validator": "^13.15.0"
+    "is-odd": "^3.0.1"
   }
 }
